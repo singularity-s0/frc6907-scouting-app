@@ -134,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: SingleChildScrollView(
           child: Column(children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               child: StopwatchTimeline(timer: _stopWatchTimer),
             ),
             DynamicScoutingOptionsWidget(fields: currentField.Properties),

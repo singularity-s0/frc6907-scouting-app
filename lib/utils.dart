@@ -32,3 +32,10 @@ class Noticing {
             ));
   }
 }
+
+class TimelineDuration {
+  final int id;
+  final int start;
+  final int end;
+  TimelineDuration(this.id, this.start, this.end);
+}

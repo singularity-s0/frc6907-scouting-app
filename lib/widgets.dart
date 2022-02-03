@@ -19,9 +19,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:scouting_6907/models.dart';
+import 'package:scouting_6907/utils.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
-const MATCH_TIME = 150000;
+const MATCH_TIME = 50000; // 150000
 
 class DynamicScoutingOptionsWidget extends StatefulWidget {
   const DynamicScoutingOptionsWidget({Key? key, required this.fields})
@@ -185,19 +186,64 @@ class StopwatchTimeline extends StatefulWidget {
 }
 
 class StopwatchTimelineState extends State<StopwatchTimeline> {
-  List<int> laps = [];
+  int lastStartTime = 0;
+  List<TimelineDuration> durations = [];
+  static const double SEPERATOR_WIDTH = 4;
 
-  Widget buildLaps() {
-    List<Widget> widgets = [];
-    for (var element in widget.timer.records.value) {
-      widgets.add(SizedBox(
-          width: MediaQuery.of(context).size.width *
-              element.rawValue! /
-              MATCH_TIME));
-      widgets.add(const ColoredBox(
-          color: Colors.red, child: SizedBox(width: 2, height: 4)));
-    }
-    return Row(children: widgets);
+  List<Positioned> buildLaps(BoxConstraints constraints) {
+    return durations
+        .map(
+          (e) => Positioned(
+            left: constraints.maxWidth * (e.start / MATCH_TIME),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ColoredBox(
+                  color:
+                      Theme.of(context).colorScheme.secondary.withOpacity(0.4),
+                  child: SizedBox(
+                    width:
+                        constraints.maxWidth * (e.end - e.start) / MATCH_TIME,
+                    height: constraints.maxHeight,
+                    child: Center(child: Text(e.id.toString())),
+                  ),
+                ),
+                ColoredBox(
+                  color: Theme.of(context).colorScheme.secondary,
+                  child: SizedBox(
+                      width: SEPERATOR_WIDTH, height: constraints.maxHeight),
+                ),
+              ],
+            ),
+          ),
+        )
+        .toList();
+  }
+
+  List<Positioned> buildLapsStartTime(BoxConstraints constraints) {
+    return durations
+        .map(
+          (e) => Positioned(
+              left: constraints.maxWidth * (e.start / MATCH_TIME),
+              child: Text(
+                  StopWatchTimer.getDisplayTime(e.start,
+                      hours: false, milliSecond: false),
+                  textScaleFactor: 0.5)),
+        )
+        .toList();
+  }
+
+  List<Positioned> buildLapsEndTime(BoxConstraints constraints) {
+    return durations
+        .map(
+          (e) => Positioned(
+              left: constraints.maxWidth * (e.end / MATCH_TIME),
+              child: Text(
+                  StopWatchTimer.getDisplayTime(e.end,
+                      hours: false, milliSecond: false),
+                  textScaleFactor: 0.5)),
+        )
+        .toList();
   }
 
   @override
@@ -208,69 +254,150 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
           initialData: widget.timer.rawTime.value,
           builder: (context, snap) {
             final value = snap.data!;
-            final displayTime =
-                StopWatchTimer.getDisplayTime(value, hours: false);
+            if (value >= MATCH_TIME) {
+              widget.timer.onExecute.add(StopWatchExecute.stop);
+            }
             return Column(
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(
-                    displayTime,
-                    style: const TextStyle(
-                        fontSize: 40,
-                        fontFamily: 'Helvetica',
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width *
-                          (value / MATCH_TIME),
-                    ),
-                    const ColoredBox(
-                        color: Colors.black,
-                        child: SizedBox(width: 2, height: 4))
-                  ],
-                ),
-                buildLaps()
-                /*Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Text(
-                    value.toString(),
-                    style: const TextStyle(
-                        fontSize: 16,
-                        fontFamily: 'Helvetica',
-                        fontWeight: FontWeight.w400),
-                  ),
-                ),*/
+                SizedBox(
+                    height: 12,
+                    child: LayoutBuilder(
+                        builder: (BuildContext context,
+                                BoxConstraints constraints) =>
+                            Stack(
+                              children: [
+                                const Positioned(
+                                    left: 0,
+                                    child: Text(
+                                      "00:00",
+                                      textScaleFactor: 0.5,
+                                    )),
+                                Positioned(
+                                    right: 0,
+                                    child: Text(
+                                        StopWatchTimer.getDisplayTime(
+                                            MATCH_TIME,
+                                            hours: false,
+                                            milliSecond: false),
+                                        textScaleFactor: 0.5))
+                              ],
+                            ))),
+                SizedBox(
+                    height: 24,
+                    child: LayoutBuilder(
+                        builder: (BuildContext context,
+                                BoxConstraints constraints) =>
+                            Stack(
+                              children: buildLaps(constraints) +
+                                  [
+                                    Positioned(
+                                        left: 0,
+                                        child: ColoredBox(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                            child: SizedBox(
+                                                width: SEPERATOR_WIDTH,
+                                                height:
+                                                    constraints.maxHeight))),
+                                    Positioned(
+                                        right: 0,
+                                        child: ColoredBox(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface,
+                                            child: SizedBox(
+                                                width: SEPERATOR_WIDTH,
+                                                height:
+                                                    constraints.maxHeight))),
+                                    Positioned(
+                                        left: constraints.maxWidth *
+                                            (lastStartTime / MATCH_TIME),
+                                        child: ColoredBox(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
+                                            child: SizedBox(
+                                                width: SEPERATOR_WIDTH * 0.5,
+                                                height:
+                                                    constraints.maxHeight))),
+                                    Positioned(
+                                        left: constraints.maxWidth *
+                                            (value / MATCH_TIME),
+                                        child: ColoredBox(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            child: SizedBox(
+                                                width: SEPERATOR_WIDTH,
+                                                height:
+                                                    constraints.maxHeight))),
+                                  ],
+                            ))),
+                SizedBox(
+                    height: 24,
+                    child: LayoutBuilder(
+                        builder: (BuildContext context,
+                                BoxConstraints constraints) =>
+                            Stack(
+                              children: [
+                                Positioned(
+                                    left: constraints.maxWidth *
+                                        (value / MATCH_TIME),
+                                    child: Text(StopWatchTimer.getDisplayTime(
+                                        value,
+                                        hours: false))),
+                              ],
+                            ))),
+                SizedBox(
+                    height: 12,
+                    child: LayoutBuilder(
+                        builder: (BuildContext context,
+                                BoxConstraints constraints) =>
+                            Stack(
+                              children: buildLapsStartTime(constraints),
+                            ))),
+                SizedBox(
+                    height: 12,
+                    child: LayoutBuilder(
+                        builder: (BuildContext context,
+                                BoxConstraints constraints) =>
+                            Stack(
+                              children: buildLapsEndTime(constraints),
+                            ))),
               ],
             );
           }),
+      const SizedBox(
+        height: 16,
+      ),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           ElevatedButton(
             onPressed: () {
+              lastStartTime = 0;
               widget.timer.onExecute.add(StopWatchExecute.start);
             },
             child: const Text("开始"),
           ),
           ElevatedButton(
             onPressed: () {
-              widget.timer.onExecute.add(StopWatchExecute.lap);
+              durations.add(TimelineDuration(
+                  durations.length, lastStartTime, widget.timer.rawTime.value));
+              lastStartTime = widget.timer.rawTime.value;
             },
-            child: const Text("记圈"),
+            child: const Text("计次"),
           ),
           ElevatedButton(
             onPressed: () {
-              widget.timer.onExecute.add(StopWatchExecute.stop);
+              lastStartTime = widget.timer.rawTime.value;
             },
-            child: const Text("停止"),
+            child: const Text("放弃"),
           ),
           ElevatedButton(
             onPressed: () {
+              durations = [];
+              lastStartTime = 0;
               widget.timer.onExecute.add(StopWatchExecute.reset);
             },
             child: const Text("重置"),
