@@ -19,6 +19,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:scouting_6907/models.dart';
+import 'package:stop_watch_timer/stop_watch_timer.dart';
+
+const MATCH_TIME = 150000;
 
 class DynamicScoutingOptionsWidget extends StatefulWidget {
   const DynamicScoutingOptionsWidget({Key? key, required this.fields})
@@ -41,9 +44,17 @@ class _DynamicScoutingOptionsWidgetState
     fields = widget.fields;
   }
 
+  @override
+  void didUpdateWidget(covariant DynamicScoutingOptionsWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // TODO: prompt to save data
+    fields = widget.fields;
+  }
+
   Widget createWidget(BuildContext context, SCWidget widgetData) {
     switch (widgetData.type) {
       case 'int':
+      case 'team':
         return TextFormField(
           decoration: InputDecoration(labelText: widgetData.name),
           onChanged: (value) => widgetData.data = value,
@@ -100,6 +111,7 @@ class _DynamicScoutingOptionsWidgetState
         );
       case 'option_child':
       case 'null':
+      case null:
         var radioButtonHostState =
             context.findAncestorStateOfType<RadioButtonHostState>()!;
         return Wrap(
@@ -131,7 +143,6 @@ class _DynamicScoutingOptionsWidgetState
 
   @override
   Widget build(BuildContext context) {
-    print(jsonEncode(fields));
     List<Widget> widgets = [];
     for (var field in fields) {
       widgets.add(Text(field.nameCn));
@@ -162,5 +173,110 @@ class RadioButtonHostState extends State<RadioButtonHost> {
   @override
   Widget build(BuildContext context) {
     return widget.child;
+  }
+}
+
+class StopwatchTimeline extends StatefulWidget {
+  final StopWatchTimer timer;
+  const StopwatchTimeline({Key? key, required this.timer}) : super(key: key);
+
+  @override
+  State<StopwatchTimeline> createState() => StopwatchTimelineState();
+}
+
+class StopwatchTimelineState extends State<StopwatchTimeline> {
+  List<int> laps = [];
+
+  Widget buildLaps() {
+    List<Widget> widgets = [];
+    for (var element in widget.timer.records.value) {
+      widgets.add(SizedBox(
+          width: MediaQuery.of(context).size.width *
+              element.rawValue! /
+              MATCH_TIME));
+      widgets.add(const ColoredBox(
+          color: Colors.red, child: SizedBox(width: 2, height: 4)));
+    }
+    return Row(children: widgets);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(children: [
+      StreamBuilder<int>(
+          stream: widget.timer.rawTime,
+          initialData: widget.timer.rawTime.value,
+          builder: (context, snap) {
+            final value = snap.data!;
+            final displayTime =
+                StopWatchTimer.getDisplayTime(value, hours: false);
+            return Column(
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    displayTime,
+                    style: const TextStyle(
+                        fontSize: 40,
+                        fontFamily: 'Helvetica',
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width *
+                          (value / MATCH_TIME),
+                    ),
+                    const ColoredBox(
+                        color: Colors.black,
+                        child: SizedBox(width: 2, height: 4))
+                  ],
+                ),
+                buildLaps()
+                /*Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(
+                    value.toString(),
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontFamily: 'Helvetica',
+                        fontWeight: FontWeight.w400),
+                  ),
+                ),*/
+              ],
+            );
+          }),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              widget.timer.onExecute.add(StopWatchExecute.start);
+            },
+            child: const Text("开始"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              widget.timer.onExecute.add(StopWatchExecute.lap);
+            },
+            child: const Text("记圈"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              widget.timer.onExecute.add(StopWatchExecute.stop);
+            },
+            child: const Text("停止"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              widget.timer.onExecute.add(StopWatchExecute.reset);
+            },
+            child: const Text("重置"),
+          ),
+        ],
+      ),
+    ]);
   }
 }

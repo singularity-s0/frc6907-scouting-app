@@ -19,11 +19,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:scouting_6907/login.dart';
 import 'package:scouting_6907/models.dart';
+import 'package:scouting_6907/repository.dart';
 import 'package:scouting_6907/widgets.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const ScountingApp());
 }
 
@@ -33,6 +36,7 @@ class ScountingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Team 6907',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -52,19 +56,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late SCData fields;
+  List<SCData> fields = [];
+  SCData currentField = SCData("Select Table", "选择表", false, false, false, []);
 
-  final StopWatchTimer _stopWatchTimer = StopWatchTimer(
-    mode: StopWatchMode.countUp,
-    onChange: (value) => print('onChange $value'),
-    onChangeRawSecond: (value) => print('onChangeRawSecond $value'),
-    onChangeRawMinute: (value) => print('onChangeRawMinute $value'),
-  );
+  final StopWatchTimer _stopWatchTimer =
+      StopWatchTimer(mode: StopWatchMode.countUp);
 
   @override
   void initState() {
     super.initState();
-    fields = SCData.fromJson(jsonDecode(string));
   }
 
   @override
@@ -74,53 +74,76 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!ScoutingRepository.getInstance().isUserInitialized) {
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+        LoginDialog.showLoginDialog(context).then((value) {
+          loadData();
+        });
+      });
+    } else {
+      loadData();
+    }
+  }
+
+  void loadData() async {
+    fields = (await ScoutingRepository.getInstance().loadInGameData()) ?? [];
+    setState(() {
+      currentField = fields.first;
+    });
+    //await ScoutingRepository.getInstance().loadGameSpec("6907", "qm16");
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          TextButton(
+              onPressed: () {
+                showModalBottomSheet(
+                    context: context,
+                    builder: (context) => BottomSheet(
+                        onClosing: () {},
+                        builder: (context) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: fields
+                                .map((e) => ListTile(
+                                      title: Text(e.ItemChn),
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                        setState(() {
+                                          currentField = e;
+                                        });
+                                      },
+                                    ))
+                                .toList(),
+                          );
+                        }));
+              },
+              child: Text(
+                currentField.ItemChn,
+                style: Theme.of(context).primaryTextTheme.bodyText1,
+              ))
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(children: [
-            StreamBuilder<int>(
-                stream: _stopWatchTimer.rawTime,
-                initialData: _stopWatchTimer.rawTime.value,
-                builder: (context, snap) {
-                  final value = snap.data!;
-                  final displayTime =
-                      StopWatchTimer.getDisplayTime(value, hours: false);
-                  return Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Text(
-                          displayTime,
-                          style: const TextStyle(
-                              fontSize: 40,
-                              fontFamily: 'Helvetica',
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Text(
-                          value.toString(),
-                          style: const TextStyle(
-                              fontSize: 16,
-                              fontFamily: 'Helvetica',
-                              fontWeight: FontWeight.w400),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-            DynamicScoutingOptionsWidget(fields: fields.properties),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: StopwatchTimeline(timer: _stopWatchTimer),
+            ),
+            DynamicScoutingOptionsWidget(fields: currentField.Properties),
           ]),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print(jsonEncode(fields));
+          loadData();
         },
         tooltip: '保存',
         child: const Icon(Icons.save),
@@ -128,84 +151,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-const string = r"""{
-  "itemChn": "Test",
-  "itemEng": "test",
-  "auto": 0,
-  "teleop": 0,
-  "endgame": 0,
-  "properties": [
-    {
-      "nameCn": "Option1",
-      "nameEn": "Option1",
-      "root": {
-        "name": "Option1-Name",
-        "type": "option",
-        "sons": [
-          {
-            "name": "Button 1",
-            "type": "null",
-            "sons": []
-          },
-          {
-            "name": "Button 2",
-            "type": "null",
-            "sons": []
-          },
-          {
-            "name": "Button 3",
-            "type": "null",
-            "sons": []
-          },
-          {
-            "name": "Button 4",
-            "type": "null",
-            "sons": []
-          }
-        ]
-      }
-    },
-    {
-      "nameCn": "TextField",
-      "nameEn": "TextField",
-      "root": {
-        "name": "TextField-Double",
-        "type": "double",
-        "sons": []
-      }
-    },
-    {
-    "nameCn": "Option-With-Child",
-    "nameEn": "Option-With-Child",
-    "root": {
-      "name": "Option-With-Child-1",
-      "type": "option",
-      "sons": [
-        {
-          "name": "first",
-          "type": "null",
-          "sons": [
-            {
-              "name": "Success",
-              "type": "boolean",
-              "sons": []
-            },
-            {
-              "name": "Fail",
-              "type": "boolean",
-              "sons": []
-            }
-          ]
-        },
-        {
-          "name": "Second",
-          "type": "null",
-          "sons": []
-        }
-      ]
-    }
-  }
-]
-}
-    """;

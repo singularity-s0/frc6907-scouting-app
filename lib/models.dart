@@ -23,16 +23,16 @@ part 'models.g.dart';
 
 @JsonSerializable()
 class SCData {
-  final String itemEng;
-  final String itemChn;
-  final int auto;
-  final int teleop;
-  final int endgame;
-  final List<SCField> properties;
+  final String ItemEng;
+  final String ItemChn;
+  final bool Auto;
+  final bool Teleop;
+  final bool Endgame;
+  final List<SCField> Properties;
 
   factory SCData.fromJson(Map<String, dynamic> json) => _$SCDataFromJson(json);
-  SCData(this.itemEng, this.itemChn, this.auto, this.teleop, this.endgame,
-      this.properties);
+  SCData(this.ItemEng, this.ItemChn, this.Auto, this.Teleop, this.Endgame,
+      this.Properties);
   Map<String, dynamic> toJson() => _$SCDataToJson(this);
 }
 
@@ -51,7 +51,7 @@ class SCField {
 @JsonSerializable()
 class SCWidget {
   final String name;
-  final String type;
+  final String? type;
   final List<SCWidget> sons;
   dynamic data;
 

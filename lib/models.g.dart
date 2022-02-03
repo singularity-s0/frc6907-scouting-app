@@ -7,23 +7,23 @@ part of 'models.dart';
 // **************************************************************************
 
 SCData _$SCDataFromJson(Map<String, dynamic> json) => SCData(
-      json['itemEng'] as String,
-      json['itemChn'] as String,
-      json['auto'] as int,
-      json['teleop'] as int,
-      json['endgame'] as int,
-      (json['properties'] as List<dynamic>)
+      json['ItemEng'] as String,
+      json['ItemChn'] as String,
+      json['Auto'] as bool,
+      json['Teleop'] as bool,
+      json['Endgame'] as bool,
+      (json['Properties'] as List<dynamic>)
           .map((e) => SCField.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
 
 Map<String, dynamic> _$SCDataToJson(SCData instance) => <String, dynamic>{
-      'itemEng': instance.itemEng,
-      'itemChn': instance.itemChn,
-      'auto': instance.auto,
-      'teleop': instance.teleop,
-      'endgame': instance.endgame,
-      'properties': instance.properties,
+      'ItemEng': instance.ItemEng,
+      'ItemChn': instance.ItemChn,
+      'Auto': instance.Auto,
+      'Teleop': instance.Teleop,
+      'Endgame': instance.Endgame,
+      'Properties': instance.Properties,
     };
 
 SCField _$SCFieldFromJson(Map<String, dynamic> json) => SCField(
@@ -40,7 +40,7 @@ Map<String, dynamic> _$SCFieldToJson(SCField instance) => <String, dynamic>{
 
 SCWidget _$SCWidgetFromJson(Map<String, dynamic> json) => SCWidget(
       json['name'] as String,
-      json['type'] as String,
+      json['type'] as String?,
       (json['sons'] as List<dynamic>)
           .map((e) => SCWidget.fromJson(e as Map<String, dynamic>))
           .toList(),

@@ -15,7 +15,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:scouting_6907/repository.dart';
+import 'package:scouting_6907/utils.dart';
 
 class LoginDialog extends StatefulWidget {
   static Future<String?> showLoginDialog(BuildContext context) async {
@@ -37,7 +40,17 @@ class _LoginDialogState extends State<LoginDialog> {
 
   /// Attempt to log in for verification.
   Future<void> login(String id, String password) async {
-    Navigator.pop(context, "token");
+    try {
+      final token = await ScoutingRepository.getInstance().login(id, password);
+      Navigator.pop(context, token);
+    } catch (error) {
+      if (error is DioError) {
+        Noticing.showAlert(
+            context, (error.response?.data).toString(), error.message);
+      } else {
+        Noticing.showAlert(context, error.toString(), "错误");
+      }
+    }
   }
 
   @override
