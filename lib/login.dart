@@ -55,37 +55,39 @@ class _LoginDialogState extends State<LoginDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("登录"),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                  labelText: "用户名", icon: Icon(Icons.perm_identity)),
-              autofocus: true,
+    return WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+            title: const Text("登录"),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                        labelText: "用户名", icon: Icon(Icons.perm_identity)),
+                    autofocus: true,
+                  ),
+                  const SizedBox(height: 2),
+                  TextField(
+                    controller: _pwdController,
+                    decoration: const InputDecoration(
+                        labelText: "密码", icon: Icon(Icons.lock_outline)),
+                    obscureText: true,
+                    onSubmitted: (_) =>
+                        login(_nameController.text, _pwdController.text),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 2),
-            TextField(
-              controller: _pwdController,
-              decoration: const InputDecoration(
-                  labelText: "密码", icon: Icon(Icons.lock_outline)),
-              obscureText: true,
-              onSubmitted: (_) =>
-                  login(_nameController.text, _pwdController.text),
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          child: const Text("登录"),
-          onPressed: () => login(_nameController.text, _pwdController.text),
-        ),
-      ],
-    );
+            actions: [
+              TextButton(
+                child: const Text("登录"),
+                onPressed: () =>
+                    login(_nameController.text, _pwdController.text),
+              ),
+            ]));
   }
 }

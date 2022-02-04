@@ -60,6 +60,8 @@ class _DynamicScoutingOptionsWidgetState
           decoration: InputDecoration(labelText: widgetData.name),
           onChanged: (value) => widgetData.data = value,
           keyboardType: const TextInputType.numberWithOptions(decimal: false),
+          validator: (value) =>
+              int.tryParse(value ?? "") == null ? null : value,
         );
       case 'double':
         return TextFormField(
@@ -146,7 +148,7 @@ class _DynamicScoutingOptionsWidgetState
   Widget build(BuildContext context) {
     List<Widget> widgets = [];
     for (var field in fields) {
-      widgets.add(Text(field.nameCn));
+      // widgets.add(Text(field.nameCn));
       widgets.add(createWidget(context, field.root));
       widgets.add(const Divider());
     }
