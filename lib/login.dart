@@ -35,20 +35,27 @@ class LoginDialog extends StatefulWidget {
 }
 
 class _LoginDialogState extends State<LoginDialog> {
+  final TextEditingController _ipController =
+      TextEditingController(text: "https://124.223.41.26:8000");
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _pwdController = TextEditingController();
 
   /// Attempt to log in for verification.
-  Future<void> login(String id, String password) async {
+  Future<void> login(String url, String id, String password) async {
     try {
+      ScoutingRepository.getInstance().setServerAddress(url);
       final token = await ScoutingRepository.getInstance().login(id, password);
       Navigator.pop(context, token);
     } catch (error) {
-      if (error is DioError) {
+      if (error is DioError && error.response?.data != null) {
         Noticing.showAlert(
             context, (error.response?.data).toString(), error.message);
       } else {
-        Noticing.showAlert(context, error.toString(), "错误");
+        if (error is DioError) {
+          Noticing.showAlert(context, error.message, "错误");
+        } else {
+          Noticing.showAlert(context, error.toString(), "错误");
+        }
       }
     }
   }
@@ -65,6 +72,12 @@ class _LoginDialogState extends State<LoginDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TextField(
+                    controller: _ipController,
+                    decoration: const InputDecoration(
+                        labelText: "服务器", icon: Icon(Icons.settings_ethernet)),
+                    autofocus: true,
+                  ),
+                  TextField(
                     controller: _nameController,
                     decoration: const InputDecoration(
                         labelText: "用户名", icon: Icon(Icons.perm_identity)),
@@ -76,8 +89,8 @@ class _LoginDialogState extends State<LoginDialog> {
                     decoration: const InputDecoration(
                         labelText: "密码", icon: Icon(Icons.lock_outline)),
                     obscureText: true,
-                    onSubmitted: (_) =>
-                        login(_nameController.text, _pwdController.text),
+                    onSubmitted: (_) => login(_ipController.text,
+                        _nameController.text, _pwdController.text),
                   ),
                 ],
               ),
@@ -85,8 +98,8 @@ class _LoginDialogState extends State<LoginDialog> {
             actions: [
               TextButton(
                 child: const Text("登录"),
-                onPressed: () =>
-                    login(_nameController.text, _pwdController.text),
+                onPressed: () => login(_ipController.text, _nameController.text,
+                    _pwdController.text),
               ),
             ]));
   }

@@ -26,7 +26,7 @@ class ScoutingRepository {
 
   factory ScoutingRepository.getInstance() => _instance;
 
-  static const String BASE_URL = "https://124.223.41.26:8000";
+  String BASE_URL = "https://124.223.41.26:8000";
 
   late Dio dio;
   String? _token;
@@ -47,13 +47,18 @@ class ScoutingRepository {
       };
       return httpClient;
     };
-    dio.options = BaseOptions(receiveDataWhenStatusError: true);
+    dio.options =
+        BaseOptions(receiveDataWhenStatusError: true, connectTimeout: 5000);
   }
 
   bool get isUserInitialized => _token != null;
   Map<String, String> get _tokenHeader {
     if (_token == null) throw Exception("Repo not yet initialized");
     return {"Authorization": "Bearer $_token"};
+  }
+
+  void setServerAddress(String url) {
+    BASE_URL = url;
   }
 
   Future<String?> login(String username, String password) async {
