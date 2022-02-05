@@ -52,11 +52,13 @@ class _DynamicScoutingOptionsWidgetState
     fields = widget.fields;
   }
 
-  Widget createWidget(BuildContext context, SCWidget widgetData) {
+  Widget createWidget(BuildContext context, SCWidget widgetData,
+      [bool enabled = true]) {
     switch (widgetData.type) {
       case 'int':
       case 'team':
         return TextFormField(
+          enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
           onChanged: (value) => widgetData.data = value,
           keyboardType: const TextInputType.numberWithOptions(decimal: false),
@@ -65,6 +67,7 @@ class _DynamicScoutingOptionsWidgetState
         );
       case 'double':
         return TextFormField(
+          enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
           onChanged: (value) => widgetData.data = value,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -73,6 +76,7 @@ class _DynamicScoutingOptionsWidgetState
         );
       case 'text':
         return TextFormField(
+          enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
           onChanged: (value) => widgetData.data = value,
         );
@@ -80,10 +84,15 @@ class _DynamicScoutingOptionsWidgetState
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Checkbox(
               value: widgetData.data ?? false,
-              onChanged: (value) => setState(() {
-                    widgetData.data = value;
-                  })),
-          Text(widgetData.name),
+              onChanged: enabled
+                  ? (value) => setState(() {
+                        widgetData.data = value;
+                      })
+                  : null),
+          Text(widgetData.name,
+              style: enabled
+                  ? null
+                  : TextStyle(color: Theme.of(context).hintColor)),
         ]);
       case 'option':
         return Column(
@@ -103,7 +112,7 @@ class _DynamicScoutingOptionsWidgetState
                       builder: (context) => Wrap(
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: widgetData.sons
-                              .map((e) => createWidget(context, e))
+                              .map((e) => createWidget(context, e, enabled))
                               .toList()),
                     ),
                   ),
@@ -123,19 +132,27 @@ class _DynamicScoutingOptionsWidgetState
             Radio(
               value: widgetData.name,
               groupValue: radioButtonHostState.currentSelection,
-              onChanged: (value) {
-                setState(() {
-                  radioButtonHostState.currentSelection = value;
-                });
-              },
+              onChanged: enabled
+                  ? (value) {
+                      setState(() {
+                        radioButtonHostState.currentSelection = value;
+                      });
+                    }
+                  : null,
             ),
-            Text(widgetData.name),
-            if (widgetData.sons.isNotEmpty &&
-                radioButtonHostState.currentSelection == widgetData.name)
+            Text(widgetData.name,
+                style: enabled
+                    ? null
+                    : TextStyle(color: Theme.of(context).hintColor)),
+            if (widgetData.sons.isNotEmpty)
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: widgetData.sons
-                    .map((e) => createWidget(context, e))
+                    .map((e) => createWidget(
+                        context,
+                        e,
+                        radioButtonHostState.currentSelection ==
+                            widgetData.name))
                     .toList(),
               ),
           ],
