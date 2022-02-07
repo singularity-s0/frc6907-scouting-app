@@ -69,12 +69,12 @@ class ScoutingRepository {
     return _token = response.data['access'];
   }
 
-  Future<List<SCData>?> loadInGameData() async {
+  Future<List?> loadInGameJson() async {
     final response = await dio.get(BASE_URL + "/api/ingameitem/get",
         queryParameters: {}, options: Options(headers: _tokenHeader));
     final List result = response.data['data'];
-    print(response.data['data']);
-    return result.map((e) => SCData.fromJson(e)).toList();
+    return result;
+    //return result.map((e) => SCData.fromJson(e)).toList();
   }
 
   Future<dynamic> loadGameSpec(String team, String match) async {

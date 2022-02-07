@@ -23,11 +23,29 @@ class Noticing {
         context: context,
         builder: (BuildContext context) => AlertDialog(
               title: Text(title),
+              content: SingleChildScrollView(child: Text(message)),
+              actions: <Widget>[
+                TextButton(
+                    child: const Text("好"),
+                    onPressed: () => Navigator.pop(context)),
+              ],
+            ));
+  }
+
+  static Future<bool?> showConfirmationDialog(
+      BuildContext context, String message, String title) {
+    return showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: Text(title),
               content: Text(message),
               actions: <Widget>[
                 TextButton(
-                    child: const Text("OK"),
-                    onPressed: () => Navigator.pop(context)),
+                    child: const Text("取消"),
+                    onPressed: () => Navigator.pop(context, false)),
+                TextButton(
+                    child: const Text("好"),
+                    onPressed: () => Navigator.pop(context, true)),
               ],
             ));
   }

@@ -60,6 +60,7 @@ class _DynamicScoutingOptionsWidgetState
         return TextFormField(
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
+          initialValue: widgetData.data,
           onChanged: (value) => widgetData.data = value,
           keyboardType: const TextInputType.numberWithOptions(decimal: false),
           validator: (value) =>
@@ -69,6 +70,7 @@ class _DynamicScoutingOptionsWidgetState
         return TextFormField(
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
+          initialValue: widgetData.data,
           onChanged: (value) => widgetData.data = value,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: (value) =>
@@ -78,6 +80,7 @@ class _DynamicScoutingOptionsWidgetState
         return TextFormField(
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
+          initialValue: widgetData.data,
           onChanged: (value) => widgetData.data = value,
         );
       case 'boolean':
@@ -198,7 +201,24 @@ class RadioButtonHostState extends State<RadioButtonHost> {
 
 class StopwatchTimeline extends StatefulWidget {
   final StopWatchTimer timer;
-  const StopwatchTimeline({Key? key, required this.timer}) : super(key: key);
+
+  /// Called every time user taps on a lap
+  final void Function(int)? onSelectLap;
+
+  /// This is called every time the user taps on the Lap button
+  /// [onSelectLap] is always called immediately after. So there is no need to manually call this function.
+  final void Function(TimelineDuration)? onCreateLap;
+
+  /// Called when user resets the stopwatch
+  final void Function()? onReset;
+
+  const StopwatchTimeline(
+      {Key? key,
+      required this.timer,
+      this.onSelectLap,
+      this.onReset,
+      this.onCreateLap})
+      : super(key: key);
 
   @override
   State<StopwatchTimeline> createState() => StopwatchTimelineState();
@@ -214,25 +234,30 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
         .map(
           (e) => Positioned(
             left: constraints.maxWidth * (e.start / MATCH_TIME),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ColoredBox(
-                  color:
-                      Theme.of(context).colorScheme.secondary.withOpacity(0.4),
-                  child: SizedBox(
-                    width:
-                        constraints.maxWidth * (e.end - e.start) / MATCH_TIME,
-                    height: constraints.maxHeight,
-                    child: Center(child: Text(e.id.toString())),
+            child: InkWell(
+              onTap: () => widget.onSelectLap?.call(e.id),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ColoredBox(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.2),
+                    child: SizedBox(
+                      width:
+                          constraints.maxWidth * (e.end - e.start) / MATCH_TIME,
+                      height: constraints.maxHeight,
+                      child: Center(child: Text(e.id.toString())),
+                    ),
                   ),
-                ),
-                ColoredBox(
-                  color: Theme.of(context).colorScheme.secondary,
-                  child: SizedBox(
-                      width: SEPERATOR_WIDTH, height: constraints.maxHeight),
-                ),
-              ],
+                  ColoredBox(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    child: SizedBox(
+                        width: SEPERATOR_WIDTH, height: constraints.maxHeight),
+                  ),
+                ],
+              ),
             ),
           ),
         )
@@ -274,7 +299,11 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
           builder: (context, snap) {
             final value = snap.data!;
             if (value >= MATCH_TIME) {
+              print("clock stop");
               widget.timer.onExecute.add(StopWatchExecute.stop);
+              durations.add(TimelineDuration(
+                  durations.length, lastStartTime, widget.timer.rawTime.value));
+              widget.onSelectLap?.call(durations.length - 1);
             }
             return Column(
               children: <Widget>[
@@ -330,28 +359,42 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                                                 height:
                                                     constraints.maxHeight))),
                                     Positioned(
-                                        left: constraints.maxWidth *
-                                            (lastStartTime / MATCH_TIME),
-                                        child: ColoredBox(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            child: SizedBox(
-                                                width: SEPERATOR_WIDTH * 0.5,
-                                                height:
-                                                    constraints.maxHeight))),
-                                    Positioned(
-                                        left: constraints.maxWidth *
-                                            (value / MATCH_TIME),
-                                        child: ColoredBox(
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                            child: SizedBox(
-                                                width: SEPERATOR_WIDTH,
-                                                height:
-                                                    constraints.maxHeight))),
+                                      left: constraints.maxWidth *
+                                          (lastStartTime / MATCH_TIME),
+                                      child: InkWell(
+                                        onTap: () => widget.onSelectLap
+                                            ?.call(durations.length),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            ColoredBox(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary
+                                                  .withOpacity(0.4),
+                                              child: SizedBox(
+                                                width: constraints.maxWidth *
+                                                    (value - lastStartTime) /
+                                                    MATCH_TIME,
+                                                height: constraints.maxHeight,
+                                              ),
+                                            ),
+                                            ColoredBox(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .secondary,
+                                              child: SizedBox(
+                                                  width: SEPERATOR_WIDTH,
+                                                  height:
+                                                      constraints.maxHeight),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
                                   ],
                             ))),
+                // Current time text row
                 SizedBox(
                     height: 24,
                     child: LayoutBuilder(
@@ -367,6 +410,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                                         hours: false))),
                               ],
                             ))),
+                // Laps start time row
                 SizedBox(
                     height: 12,
                     child: LayoutBuilder(
@@ -375,6 +419,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                             Stack(
                               children: buildLapsStartTime(constraints),
                             ))),
+                // Laps end time row
                 SizedBox(
                     height: 12,
                     child: LayoutBuilder(
@@ -401,9 +446,12 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
           ),
           ElevatedButton(
             onPressed: () {
-              durations.add(TimelineDuration(
-                  durations.length, lastStartTime, widget.timer.rawTime.value));
+              final tlduration = TimelineDuration(
+                  durations.length, lastStartTime, widget.timer.rawTime.value);
+              durations.add(tlduration);
               lastStartTime = widget.timer.rawTime.value;
+              widget.onCreateLap?.call(tlduration);
+              widget.onSelectLap?.call(durations.length);
             },
             child: const Text("计次"),
           ),
@@ -414,10 +462,15 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             child: const Text("放弃"),
           ),
           ElevatedButton(
-            onPressed: () {
-              durations = [];
-              lastStartTime = 0;
-              widget.timer.onExecute.add(StopWatchExecute.reset);
+            onPressed: () async {
+              if (await Noticing.showConfirmationDialog(
+                      context, "所有已经记录的数据将被清空", "确认重置") ==
+                  true) {
+                durations = [];
+                lastStartTime = 0;
+                widget.timer.onExecute.add(StopWatchExecute.reset);
+                widget.onReset?.call();
+              }
             },
             child: const Text("重置"),
           ),

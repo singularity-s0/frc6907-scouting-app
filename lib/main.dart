@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:scouting_6907/login.dart';
 import 'package:scouting_6907/models.dart';
 import 'package:scouting_6907/repository.dart';
+import 'package:scouting_6907/utils.dart';
 import 'package:scouting_6907/widgets.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
@@ -41,23 +42,32 @@ class ScountingApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Team 6907 Scouting'),
+      home: const HomePage(title: 'Team 6907 Scouting'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key, required this.title}) : super(key: key);
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  List<SCData> fields = [];
+class _HomePageState extends State<HomePage> {
+  /// Since Dart does not support object cloning,
+  /// we store fields in JSON format and create instances of SCData only when needed
+  /// so that we can have multiple instances of the same SCData
+  List fields_json = [];
   SCData currentField = SCData("Select Table", "选择表", false, false, false, []);
+
+  int currentSelectedLap = 0;
+
+  /// Storage for all data involved during scouting
+  /// The index of the list is the lap ID
+  List<SCData> userData = [];
 
   final StopWatchTimer _stopWatchTimer =
       StopWatchTimer(mode: StopWatchMode.countUp);
@@ -88,11 +98,20 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void loadData() async {
-    fields = (await ScoutingRepository.getInstance().loadInGameData()) ?? [];
+    fields_json =
+        (await ScoutingRepository.getInstance().loadInGameJson()) ?? [];
     setState(() {
-      currentField = fields.first;
+      currentField = SCData.fromJson(fields_json.first);
     });
     //await ScoutingRepository.getInstance().loadGameSpec("6907", "qm16");
+  }
+
+  void saveData() {
+    if (currentSelectedLap == userData.length) {
+      userData.add(currentField);
+    } else {
+      userData[currentSelectedLap] = currentField;
+    }
   }
 
   @override
@@ -110,7 +129,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         builder: (context) {
                           return Column(
                             mainAxisSize: MainAxisSize.min,
-                            children: fields
+                            children: fields_json
+                                .map((e) => SCData.fromJson(e))
                                 .map((e) => ListTile(
                                       title: Text(e.ItemChn),
                                       onTap: () {
@@ -135,15 +155,44 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              child: StopwatchTimeline(timer: _stopWatchTimer),
+              child: StopwatchTimeline(
+                  timer: _stopWatchTimer,
+                  onSelectLap: (id) {
+                    saveData();
+                    setState(
+                      () {
+                        currentSelectedLap = id;
+                        if (id < userData.length) {
+                          currentField = userData[id];
+                        }
+                      },
+                    );
+                  },
+                  onReset: () {
+                    setState(() {
+                      currentSelectedLap = 0;
+                      userData.clear();
+                      currentField = SCData.fromJson(fields_json.first);
+                    });
+                  },
+                  onCreateLap: (tlduration) {
+                    currentField.startTime = tlduration.start;
+                    currentField.endTime = tlduration.end;
+                  }),
             ),
-            DynamicScoutingOptionsWidget(fields: currentField.Properties),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              child:
+                  DynamicScoutingOptionsWidget(fields: currentField.Properties),
+            ),
           ]),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          loadData();
+          saveData();
+          print(jsonEncode(userData));
+          Noticing.showAlert(context, jsonEncode(userData), "Data");
         },
         tooltip: '保存',
         child: const Icon(Icons.save),

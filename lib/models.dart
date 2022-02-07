@@ -29,6 +29,8 @@ class SCData {
   final bool Teleop;
   final bool Endgame;
   final List<SCField> Properties;
+  int? startTime;
+  int? endTime;
 
   factory SCData.fromJson(Map<String, dynamic> json) => _$SCDataFromJson(json);
   SCData(this.ItemEng, this.ItemChn, this.Auto, this.Teleop, this.Endgame,
