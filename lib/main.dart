@@ -28,6 +28,7 @@ import 'package:stop_watch_timer/stop_watch_timer.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = SelfSignedCertHttpOverrides();
   runApp(const ScountingApp());
 }
 
@@ -75,17 +76,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  void dispose() async {
-    super.dispose();
-    await _stopWatchTimer.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
     if (!ScoutingRepository.getInstance().isUserInitialized) {
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
         LoginDialog.showLoginDialog(context).then((value) {
@@ -95,6 +85,12 @@ class _HomePageState extends State<HomePage> {
     } else {
       loadData();
     }
+  }
+
+  @override
+  void dispose() async {
+    super.dispose();
+    await _stopWatchTimer.dispose();
   }
 
   void loadData() async {

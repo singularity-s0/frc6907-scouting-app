@@ -113,6 +113,7 @@ class _DynamicScoutingOptionsWidgetState
                     widgetData: widgetData,
                     child: Builder(
                       builder: (context) => Wrap(
+                          alignment: WrapAlignment.spaceBetween,
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: widgetData.sons
                               .map((e) => createWidget(context, e, enabled))

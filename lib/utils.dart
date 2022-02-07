@@ -15,7 +15,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:scouting_6907/repository.dart';
 
 class Noticing {
   static showAlert(BuildContext context, String message, String title) {
@@ -56,4 +59,17 @@ class TimelineDuration {
   final int start;
   final int end;
   TimelineDuration(this.id, this.start, this.end);
+}
+
+class SelfSignedCertHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          ((X509Certificate cert, String host, int port) {
+        // TODO: WARNING this basically disables https security
+        // DO NOT USE IN PRODUCTION
+        return true;
+      });
+  }
 }
