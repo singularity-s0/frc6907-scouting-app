@@ -96,21 +96,22 @@ class _HomePageState extends State<HomePage> {
         await LoginDialog.showLoginDialog(context);
         await loadData();
         if (matchInfo == null) {
-          matchInfo = await Noticing.showMatchStringInput(context);
-          setState(() {
-            title = "${matchInfo?.team} ${matchInfo?.match}";
-          });
+          await showMatchStringDialog(context);
         }
       });
     } else {
       await loadData();
       if (matchInfo == null) {
-        matchInfo = await Noticing.showMatchStringInput(context);
-        setState(() {
-          title = "${matchInfo?.team} ${matchInfo?.match}";
-        });
+        await showMatchStringDialog(context);
       }
     }
+  }
+
+  Future<void> showMatchStringDialog(BuildContext context) async {
+    matchInfo = await Noticing.showMatchStringInput(context);
+    setState(() {
+      title = "${matchInfo?.team} ${matchInfo?.match}";
+    });
   }
 
   @override
@@ -184,7 +185,29 @@ class _HomePageState extends State<HomePage> {
               child: Text(
                 currentField.ItemChn,
                 style: Theme.of(context).primaryTextTheme.bodyText1,
-              ))
+              )),
+          PopupMenuButton(
+            icon: const Icon(Icons.more_vert),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                child: const Text("退出登录"),
+                onTap: () {
+                  ScoutingRepository.getInstance().logout();
+                  matchInfo = null;
+                  currentSelectedLap = 0;
+                  userData.clear();
+                  currentField = SCData.fromJson(fields_json.first);
+                  initialize();
+                },
+              ),
+              PopupMenuItem(
+                child: const Text("关于本应用"),
+                onTap: () async {
+                  await Noticing.showAbout(context);
+                },
+              ),
+            ],
+          ),
         ],
       ),
       body: SafeArea(

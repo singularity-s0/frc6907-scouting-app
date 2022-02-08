@@ -27,8 +27,9 @@ class Noticing {
     return showDialog(
         context: context,
         builder: (BuildContext context) => AlertDialog(
+              scrollable: true,
               title: Text(title),
-              content: SingleChildScrollView(child: Text(message)),
+              content: Text(message),
               actions: <Widget>[
                 TextButton(
                     child: const Text("好"),
@@ -42,6 +43,7 @@ class Noticing {
     return showDialog<bool>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
+              scrollable: true,
               title: Text(title),
               content: Text(message),
               actions: <Widget>[
@@ -81,8 +83,16 @@ class Noticing {
 
   static Future<MatchInfo?> showMatchStringInput(BuildContext context) {
     return showDialog<MatchInfo>(
+        barrierDismissible: false,
         context: context,
         builder: (BuildContext context) => const MatchInfoSelector());
+  }
+
+  static showAbout(BuildContext context) {
+    return showAlert(
+        context,
+        "Copyright 2022 FRC Team 6907\n\nProject Open Source at https://github.com/singularity-s0/frc6907-scouting-app",
+        "关于本应用");
   }
 }
 
@@ -141,32 +151,14 @@ class _MatchInfoSelectorState extends State<MatchInfoSelector> {
             ),
           ),
           const SizedBox(width: 4),
-          const Text("第"),
-          const SizedBox(width: 4),
-          IntrinsicWidth(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 36),
-              child: TextFormField(
-                onChanged: (value) => matchCount = value,
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: false),
-                validator: (value) =>
-                    int.tryParse(value ?? "") == null ? "请输入数字" : null,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Text("场"),
-          if (MATCH_HAS_ROUND_COUNT[matchType] == true) ...[
-            const SizedBox(width: 4),
+          Row(mainAxisSize: MainAxisSize.min, children: [
             const Text("第"),
             const SizedBox(width: 4),
             IntrinsicWidth(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 36),
+                constraints: const BoxConstraints(minWidth: 24),
                 child: TextFormField(
-                  onChanged: (value) => roundCount = value,
+                  onChanged: (value) => matchCount = value,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: false),
                   validator: (value) =>
@@ -176,7 +168,29 @@ class _MatchInfoSelectorState extends State<MatchInfoSelector> {
               ),
             ),
             const SizedBox(width: 4),
-            const Text("局"),
+            const Text("场"),
+          ]),
+          if (MATCH_HAS_ROUND_COUNT[matchType] == true) ...[
+            const SizedBox(width: 4),
+            Row(mainAxisSize: MainAxisSize.min, children: [
+              const Text("第"),
+              const SizedBox(width: 4),
+              IntrinsicWidth(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 24),
+                  child: TextFormField(
+                    onChanged: (value) => roundCount = value,
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: false),
+                    validator: (value) =>
+                        int.tryParse(value ?? "") == null ? "请输入数字" : null,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Text("局"),
+            ]),
           ]
         ],
       ),
@@ -216,14 +230,14 @@ class SelfSignedCertHttpOverrides extends HttpOverrides {
 const Map<String, String> MATCH_NAME_CODE = {
   "练习赛": "p",
   "资格赛": "qm",
-  "四分之一决赛": "qf",
+  "八进四": "qf",
   "半决赛": "sf",
   "决赛": "f"
 };
 const Map<String, bool> MATCH_HAS_ROUND_COUNT = {
   "练习赛": false,
   "资格赛": false,
-  "四分之一决赛": true,
+  "八进四": true,
   "半决赛": true,
   "决赛": true
 };

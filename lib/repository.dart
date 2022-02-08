@@ -39,6 +39,10 @@ class ScoutingRepository {
     return {"Authorization": "Bearer $_token"};
   }
 
+  void logout() {
+    _token = null;
+  }
+
   void setServerAddress(String url) {
     BASE_URL = url;
   }

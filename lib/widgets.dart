@@ -48,7 +48,6 @@ class _DynamicScoutingOptionsWidgetState
   @override
   void didUpdateWidget(covariant DynamicScoutingOptionsWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // TODO: prompt to save data
     fields = widget.fields;
   }
 
