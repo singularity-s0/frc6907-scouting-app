@@ -66,6 +66,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late String title;
+  MatchInfo? matchInfo;
 
   /// Since Dart does not support object cloning,
   /// we store fields in JSON format and create instances of SCData only when needed
@@ -94,9 +95,21 @@ class _HomePageState extends State<HomePage> {
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
         await LoginDialog.showLoginDialog(context);
         await loadData();
+        if (matchInfo == null) {
+          matchInfo = await Noticing.showMatchStringInput(context);
+          setState(() {
+            title = "${matchInfo?.team} ${matchInfo?.match}";
+          });
+        }
       });
     } else {
       await loadData();
+      if (matchInfo == null) {
+        matchInfo = await Noticing.showMatchStringInput(context);
+        setState(() {
+          title = "${matchInfo?.team} ${matchInfo?.match}";
+        });
+      }
     }
   }
 
@@ -226,13 +239,14 @@ class _HomePageState extends State<HomePage> {
                   context, "数据将会上传到服务器", "提交数据") ==
               true) {
             try {
-              final eval = await Noticing.showInputDialog(context, "评价本场比赛");
+              final eval = await Noticing.showInputDialog(context, "评价本场比赛",
+                  maxLength: 250);
               if (eval?.isNotEmpty == true) {
                 await ScoutingRepository.getInstance().postGameSpec(
-                    6907,
-                    "qm16",
+                    matchInfo!.team,
+                    matchInfo!.match,
                     jsonEncode(userData),
-                    eval!); // TODO: Ask user for input
+                    eval!);
                 Noticing.showAlert(context, "数据已经上传", "提交成功");
               } else {
                 Noticing.showAlert(context, "比赛评价不能为空", "无法提交");

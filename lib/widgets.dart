@@ -61,20 +61,22 @@ class _DynamicScoutingOptionsWidgetState
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
           initialValue: widgetData.data,
-          onChanged: (value) => widgetData.data = value,
+          onChanged: (value) => widgetData.data = int.tryParse(value),
           keyboardType: const TextInputType.numberWithOptions(decimal: false),
           validator: (value) =>
-              int.tryParse(value ?? "") == null ? null : value,
+              int.tryParse(value ?? "") == null ? "请输入数字" : null,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
         );
       case 'double':
         return TextFormField(
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
           initialValue: widgetData.data,
-          onChanged: (value) => widgetData.data = value,
+          onChanged: (value) => widgetData.data = double.tryParse(value),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: (value) =>
-              double.tryParse(value ?? "") == null ? null : value,
+              double.tryParse(value ?? "") == null ? "请输入数字" : null,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
         );
       case 'text':
         return TextFormField(

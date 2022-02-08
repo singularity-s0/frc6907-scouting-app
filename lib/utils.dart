@@ -16,8 +16,10 @@
  */
 
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scouting_6907/repository.dart';
 
 class Noticing {
@@ -53,7 +55,8 @@ class Noticing {
             ));
   }
 
-  static Future<String?> showInputDialog(BuildContext context, String title) {
+  static Future<String?> showInputDialog(BuildContext context, String title,
+      {int? maxLength}) {
     var text = "";
     return showDialog<String>(
         context: context,
@@ -62,6 +65,11 @@ class Noticing {
               content: TextField(
                 onChanged: (value) => text = value,
                 onSubmitted: (value) => Navigator.pop(context, value),
+                maxLength: maxLength,
+                maxLengthEnforcement:
+                    MaxLengthEnforcement.truncateAfterCompositionEnds,
+                maxLines: maxLength == null ? 1 : null,
+                expands: maxLength == null ? false : true,
               ),
               actions: <Widget>[
                 TextButton(
@@ -70,6 +78,113 @@ class Noticing {
               ],
             ));
   }
+
+  static Future<MatchInfo?> showMatchStringInput(BuildContext context) {
+    return showDialog<MatchInfo>(
+        context: context,
+        builder: (BuildContext context) => const MatchInfoSelector());
+  }
+}
+
+class MatchInfoSelector extends StatefulWidget {
+  const MatchInfoSelector({Key? key}) : super(key: key);
+
+  @override
+  State<MatchInfoSelector> createState() => _MatchInfoSelectorState();
+}
+
+class _MatchInfoSelectorState extends State<MatchInfoSelector> {
+  int? team;
+  String? matchType, matchCount, roundCount;
+
+  void submit() {
+    if (matchType != null && matchCount != null && team != null) {
+      String matchString = MATCH_NAME_CODE[matchType]! + matchCount!;
+      if (roundCount != null) {
+        matchString += 'm$roundCount';
+      }
+      Navigator.pop(context, MatchInfo(team!, matchString));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("比赛信息"),
+      content: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          TextFormField(
+            autofocus: true,
+            onChanged: (value) => team = int.tryParse(value),
+            keyboardType: const TextInputType.numberWithOptions(decimal: false),
+            validator: (value) =>
+                int.tryParse(value ?? "") == null ? "请输入数字" : null,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: const InputDecoration(labelText: "比赛队伍"),
+          ),
+          IntrinsicWidth(
+            child: DropdownButtonFormField<String>(
+              hint: const Text("选择比赛"),
+              items: MATCH_NAME_CODE.keys
+                  .map(
+                      (e) => DropdownMenuItem<String>(value: e, child: Text(e)))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  matchType = value;
+                  if (MATCH_HAS_ROUND_COUNT[matchType] != true) {
+                    roundCount = null;
+                  }
+                });
+              },
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Text("第"),
+          const SizedBox(width: 4),
+          IntrinsicWidth(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 36),
+              child: TextFormField(
+                onChanged: (value) => matchCount = value,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: false),
+                validator: (value) =>
+                    int.tryParse(value ?? "") == null ? "请输入数字" : null,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Text("场"),
+          if (MATCH_HAS_ROUND_COUNT[matchType] == true) ...[
+            const SizedBox(width: 4),
+            const Text("第"),
+            const SizedBox(width: 4),
+            IntrinsicWidth(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 36),
+                child: TextFormField(
+                  onChanged: (value) => roundCount = value,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: false),
+                  validator: (value) =>
+                      int.tryParse(value ?? "") == null ? "请输入数字" : null,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                ),
+              ),
+            ),
+            const SizedBox(width: 4),
+            const Text("局"),
+          ]
+        ],
+      ),
+      actions: <Widget>[
+        TextButton(child: const Text("好"), onPressed: submit),
+      ],
+    );
+  }
 }
 
 class TimelineDuration {
@@ -77,6 +192,12 @@ class TimelineDuration {
   final int start;
   final int end;
   TimelineDuration(this.id, this.start, this.end);
+}
+
+class MatchInfo {
+  final int team;
+  final String match;
+  MatchInfo(this.team, this.match);
 }
 
 class SelfSignedCertHttpOverrides extends HttpOverrides {
@@ -92,12 +213,19 @@ class SelfSignedCertHttpOverrides extends HttpOverrides {
   }
 }
 
-const Map<String, String> NAME_CODE_MAP = {
+const Map<String, String> MATCH_NAME_CODE = {
   "练习赛": "p",
   "资格赛": "qm",
   "四分之一决赛": "qf",
   "半决赛": "sf",
   "决赛": "f"
+};
+const Map<String, bool> MATCH_HAS_ROUND_COUNT = {
+  "练习赛": false,
+  "资格赛": false,
+  "四分之一决赛": true,
+  "半决赛": true,
+  "决赛": true
 };
 
 class MatchPhase {
