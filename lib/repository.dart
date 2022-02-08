@@ -64,4 +64,16 @@ class ScoutingRepository {
         queryParameters: {}, options: Options(headers: _tokenHeader));
     print(response.data);
   }
+
+  Future<void> postGameSpec(
+      int team, String match, dynamic gameData, String evaluation) async {
+    await dio.post(BASE_URL + "/api/gamespec/add",
+        data: {
+          "TeamNumber": team,
+          "Match": match,
+          "IngameData": gameData,
+          "Evaluation": evaluation,
+        },
+        options: Options(headers: _tokenHeader));
+  }
 }

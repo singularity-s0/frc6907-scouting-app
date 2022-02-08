@@ -18,6 +18,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_6907/login.dart';
 import 'package:scouting_6907/models.dart';
@@ -110,6 +111,30 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void showSCDataSelector() {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) => BottomSheet(
+            onClosing: () {},
+            builder: (context) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: fields_json
+                    .map((e) => SCData.fromJson(e))
+                    .map((e) => ListTile(
+                          title: Text(e.ItemChn),
+                          onTap: () {
+                            Navigator.pop(context);
+                            setState(() {
+                              currentField = e;
+                            });
+                          },
+                        ))
+                    .toList(),
+              );
+            }));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,29 +142,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(widget.title),
         actions: [
           TextButton(
-              onPressed: () {
-                showModalBottomSheet(
-                    context: context,
-                    builder: (context) => BottomSheet(
-                        onClosing: () {},
-                        builder: (context) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: fields_json
-                                .map((e) => SCData.fromJson(e))
-                                .map((e) => ListTile(
-                                      title: Text(e.ItemChn),
-                                      onTap: () {
-                                        Navigator.pop(context);
-                                        setState(() {
-                                          currentField = e;
-                                        });
-                                      },
-                                    ))
-                                .toList(),
-                          );
-                        }));
-              },
+              onPressed: showSCDataSelector,
               child: Text(
                 currentField.ItemChn,
                 style: Theme.of(context).primaryTextTheme.bodyText1,
@@ -174,6 +177,7 @@ class _HomePageState extends State<HomePage> {
                   onCreateLap: (tlduration) {
                     currentField.startTime = tlduration.start;
                     currentField.endTime = tlduration.end;
+                    showSCDataSelector();
                   }),
             ),
             Padding(
@@ -185,10 +189,28 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
           saveData();
-          print(jsonEncode(userData));
-          Noticing.showAlert(context, jsonEncode(userData), "Data");
+          if (await Noticing.showConfirmationDialog(
+                  context, "数据将会上传到服务器", "提交数据") ==
+              true) {
+            try {
+              await ScoutingRepository.getInstance().postGameSpec(6907, "qm16",
+                  jsonEncode(userData), "good"); // TODO: Ask user for input
+              Noticing.showAlert(context, "数据已经上传", "提交成功");
+            } catch (error) {
+              if (error is DioError && error.response?.data != null) {
+                Noticing.showAlert(
+                    context, (error.response?.data).toString(), error.message);
+              } else {
+                if (error is DioError) {
+                  Noticing.showAlert(context, error.message, "错误");
+                } else {
+                  Noticing.showAlert(context, error.toString(), "错误");
+                }
+              }
+            }
+          }
         },
         tooltip: '保存',
         child: const Icon(Icons.save),
