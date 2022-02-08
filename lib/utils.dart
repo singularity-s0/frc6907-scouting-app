@@ -100,4 +100,24 @@ const Map<String, String> NAME_CODE_MAP = {
   "决赛": "f"
 };
 
-enum MatchPhase { auto, teleop, endgame }
+class MatchPhase {
+  final String _value;
+  const MatchPhase._internal(this._value);
+
+  @override
+  toString() => _value;
+
+  static const auto = MatchPhase._internal('auto');
+  static const teleop = MatchPhase._internal('teleop');
+  static const endgame = MatchPhase._internal('endgame');
+
+  static MatchPhase fromTime(int matchTime) {
+    if (matchTime <= 15000) {
+      return MatchPhase.auto;
+    } else if (matchTime <= 120000) {
+      return MatchPhase.teleop;
+    } else {
+      return MatchPhase.endgame;
+    }
+  }
+}

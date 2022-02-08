@@ -123,6 +123,19 @@ class _HomePageState extends State<HomePage> {
   }
 
   void showSCDataSelector() {
+    bool isCurrentPhase(SCData scData) {
+      final phase = MatchPhase.fromTime(_stopWatchTimer.rawTime.value);
+      switch (phase) {
+        case MatchPhase.auto:
+          return scData.Auto;
+        case MatchPhase.teleop:
+          return scData.Teleop;
+        case MatchPhase.endgame:
+          return scData.Endgame;
+      }
+      return false;
+    }
+
     showModalBottomSheet(
         context: context,
         builder: (context) => BottomSheet(
@@ -133,6 +146,7 @@ class _HomePageState extends State<HomePage> {
                 children: fields_json
                     .map((e) => SCData.fromJson(e))
                     .map((e) => ListTile(
+                          enabled: isCurrentPhase(e),
                           title: Text(e.ItemChn),
                           onTap: () {
                             Navigator.pop(context);
