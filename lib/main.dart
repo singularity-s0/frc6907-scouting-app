@@ -15,6 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -41,8 +42,13 @@ class ScountingApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Team 6907',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      theme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF182181), brightness: Brightness.light),
+      ),
+      darkTheme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(0xFF182181), brightness: Brightness.dark),
       ),
       home: const HomePage(title: 'Team 6907 Scouting'),
     );
@@ -59,6 +65,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late String title;
+
   /// Since Dart does not support object cloning,
   /// we store fields in JSON format and create instances of SCData only when needed
   /// so that we can have multiple instances of the same SCData
@@ -77,14 +85,18 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    title = widget.title;
+    unawaited(initialize());
+  }
+
+  Future<void> initialize() async {
     if (!ScoutingRepository.getInstance().isUserInitialized) {
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
-        LoginDialog.showLoginDialog(context).then((value) {
-          loadData();
-        });
+      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+        await LoginDialog.showLoginDialog(context);
+        await loadData();
       });
     } else {
-      loadData();
+      await loadData();
     }
   }
 
@@ -94,13 +106,12 @@ class _HomePageState extends State<HomePage> {
     await _stopWatchTimer.dispose();
   }
 
-  void loadData() async {
+  Future<void> loadData() async {
     fields_json =
         (await ScoutingRepository.getInstance().loadInGameJson()) ?? [];
     setState(() {
       currentField = SCData.fromJson(fields_json.first);
     });
-    //await ScoutingRepository.getInstance().loadGameSpec("6907", "qm16");
   }
 
   void saveData() {
@@ -139,7 +150,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
         actions: [
           TextButton(
               onPressed: showSCDataSelector,
@@ -155,30 +166,36 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               child: StopwatchTimeline(
-                  timer: _stopWatchTimer,
-                  onSelectLap: (id) {
-                    saveData();
-                    setState(
-                      () {
-                        currentSelectedLap = id;
-                        if (id < userData.length) {
-                          currentField = userData[id];
-                        }
-                      },
-                    );
-                  },
-                  onReset: () {
-                    setState(() {
-                      currentSelectedLap = 0;
-                      userData.clear();
-                      currentField = SCData.fromJson(fields_json.first);
-                    });
-                  },
-                  onCreateLap: (tlduration) {
-                    currentField.startTime = tlduration.start;
-                    currentField.endTime = tlduration.end;
-                    showSCDataSelector();
-                  }),
+                timer: _stopWatchTimer,
+                onSelectLap: (id) {
+                  saveData();
+                  setState(
+                    () {
+                      currentSelectedLap = id;
+                      if (id < userData.length) {
+                        currentField = userData[id];
+                      }
+                    },
+                  );
+                },
+                onReset: () {
+                  setState(() {
+                    currentSelectedLap = 0;
+                    userData.clear();
+                    currentField = SCData.fromJson(fields_json.first);
+                  });
+                },
+                onCreateLap: (tlduration) {
+                  currentField.startTime = tlduration.start;
+                  currentField.endTime = tlduration.end;
+                  showSCDataSelector();
+                },
+                onTimerStop: (tlduration) {
+                  currentField.startTime = tlduration.start;
+                  currentField.endTime = tlduration.end;
+                  saveData();
+                },
+              ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -195,9 +212,18 @@ class _HomePageState extends State<HomePage> {
                   context, "数据将会上传到服务器", "提交数据") ==
               true) {
             try {
-              await ScoutingRepository.getInstance().postGameSpec(6907, "qm16",
-                  jsonEncode(userData), "good"); // TODO: Ask user for input
-              Noticing.showAlert(context, "数据已经上传", "提交成功");
+              final eval = await Noticing.showInputDialog(context, "评价本场比赛");
+              if (eval?.isNotEmpty == true) {
+                await ScoutingRepository.getInstance().postGameSpec(
+                    6907,
+                    "qm16",
+                    jsonEncode(userData),
+                    eval!); // TODO: Ask user for input
+                Noticing.showAlert(context, "数据已经上传", "提交成功");
+              } else {
+                Noticing.showAlert(context, "比赛评价不能为空", "无法提交");
+                return;
+              }
             } catch (error) {
               if (error is DioError && error.response?.data != null) {
                 Noticing.showAlert(

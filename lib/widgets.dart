@@ -22,7 +22,7 @@ import 'package:scouting_6907/models.dart';
 import 'package:scouting_6907/utils.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
-const MATCH_TIME = 50000; // 150000
+const MATCH_TIME = 150000;
 
 class DynamicScoutingOptionsWidget extends StatefulWidget {
   const DynamicScoutingOptionsWidget({Key? key, required this.fields})
@@ -209,6 +209,7 @@ class StopwatchTimeline extends StatefulWidget {
   /// This is called every time the user taps on the Lap button
   /// [onSelectLap] is always called immediately after. So there is no need to manually call this function.
   final void Function(TimelineDuration)? onCreateLap;
+  final void Function(TimelineDuration)? onTimerStop;
 
   /// Called when user resets the stopwatch
   final void Function()? onReset;
@@ -218,7 +219,8 @@ class StopwatchTimeline extends StatefulWidget {
       required this.timer,
       this.onSelectLap,
       this.onReset,
-      this.onCreateLap})
+      this.onCreateLap,
+      this.onTimerStop})
       : super(key: key);
 
   @override
@@ -228,7 +230,7 @@ class StopwatchTimeline extends StatefulWidget {
 class StopwatchTimelineState extends State<StopwatchTimeline> {
   int lastStartTime = 0;
   List<TimelineDuration> durations = [];
-  static const double SEPERATOR_WIDTH = 4;
+  static const double SEPERATOR_WIDTH = 2;
 
   List<Positioned> buildLaps(BoxConstraints constraints) {
     return durations
@@ -241,19 +243,27 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   ColoredBox(
+                    color: Theme.of(context).colorScheme.secondary,
+                    child: SizedBox(
+                        width: SEPERATOR_WIDTH, height: constraints.maxHeight),
+                  ),
+                  ColoredBox(
                     color: Theme.of(context)
                         .colorScheme
-                        .onSurface
+                        .secondary
                         .withOpacity(0.2),
                     child: SizedBox(
-                      width:
-                          constraints.maxWidth * (e.end - e.start) / MATCH_TIME,
+                      width: (constraints.maxWidth *
+                                  (e.end - e.start) /
+                                  MATCH_TIME -
+                              SEPERATOR_WIDTH * 2)
+                          .positiveValueOrZero(),
                       height: constraints.maxHeight,
                       child: Center(child: Text(e.id.toString())),
                     ),
                   ),
                   ColoredBox(
-                    color: Theme.of(context).colorScheme.onSurface,
+                    color: Theme.of(context).colorScheme.secondary,
                     child: SizedBox(
                         width: SEPERATOR_WIDTH, height: constraints.maxHeight),
                   ),
@@ -299,12 +309,18 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
           initialData: widget.timer.rawTime.value,
           builder: (context, snap) {
             final value = snap.data!;
-            if (value >= MATCH_TIME) {
-              print("clock stop");
+            if (value >= MATCH_TIME && widget.timer.isRunning) {
+              // Stop timer
               widget.timer.onExecute.add(StopWatchExecute.stop);
-              durations.add(TimelineDuration(
-                  durations.length, lastStartTime, widget.timer.rawTime.value));
-              widget.onSelectLap?.call(durations.length - 1);
+              final tlduration =
+                  TimelineDuration(durations.length, lastStartTime, value);
+              durations.add(tlduration);
+              lastStartTime = value;
+              widget.onTimerStop?.call(tlduration);
+              WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+                // Disable buttons
+                setState(() {});
+              });
             }
             return Column(
               children: <Widget>[
@@ -344,7 +360,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                                         child: ColoredBox(
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .onSurface,
+                                                .secondary,
                                             child: SizedBox(
                                                 width: SEPERATOR_WIDTH,
                                                 height:
@@ -354,7 +370,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                                         child: ColoredBox(
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .onSurface,
+                                                .secondary,
                                             child: SizedBox(
                                                 width: SEPERATOR_WIDTH,
                                                 height:
@@ -371,19 +387,31 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                                             ColoredBox(
                                               color: Theme.of(context)
                                                   .colorScheme
-                                                  .secondary
+                                                  .primary,
+                                              child: SizedBox(
+                                                  width: SEPERATOR_WIDTH,
+                                                  height:
+                                                      constraints.maxHeight),
+                                            ),
+                                            ColoredBox(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .primary
                                                   .withOpacity(0.4),
                                               child: SizedBox(
-                                                width: constraints.maxWidth *
-                                                    (value - lastStartTime) /
-                                                    MATCH_TIME,
+                                                width: (constraints.maxWidth *
+                                                            (value -
+                                                                lastStartTime) /
+                                                            MATCH_TIME -
+                                                        SEPERATOR_WIDTH * 2)
+                                                    .positiveValueOrZero(),
                                                 height: constraints.maxHeight,
                                               ),
                                             ),
                                             ColoredBox(
                                               color: Theme.of(context)
                                                   .colorScheme
-                                                  .secondary,
+                                                  .primary,
                                               child: SizedBox(
                                                   width: SEPERATOR_WIDTH,
                                                   height:
@@ -398,19 +426,34 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                 // Current time text row
                 SizedBox(
                     height: 24,
-                    child: LayoutBuilder(
-                        builder: (BuildContext context,
-                                BoxConstraints constraints) =>
-                            Stack(
-                              children: [
-                                Positioned(
-                                    left: constraints.maxWidth *
-                                        (value / MATCH_TIME),
-                                    child: Text(StopWatchTimer.getDisplayTime(
-                                        value,
-                                        hours: false))),
-                              ],
-                            ))),
+                    child: LayoutBuilder(builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                      final TextPainter textPainter = TextPainter(
+                          textDirection: TextDirection.ltr,
+                          text: TextSpan(
+                            text: StopWatchTimer.getDisplayTime(value,
+                                hours: false, milliSecond: false),
+                          ));
+                      final location =
+                          constraints.maxWidth * (value / MATCH_TIME);
+                      textPainter.layout();
+                      return Stack(
+                        children: [
+                          if (textPainter.size.width + location <=
+                              constraints.maxWidth) ...[
+                            Positioned(
+                                left: location,
+                                child: Text(StopWatchTimer.getDisplayTime(value,
+                                    hours: false, milliSecond: false))),
+                          ] else ...[
+                            Positioned(
+                                right: constraints.maxWidth - location,
+                                child: Text(StopWatchTimer.getDisplayTime(value,
+                                    hours: false, milliSecond: false))),
+                          ]
+                        ],
+                      );
+                    })),
                 // Laps start time row
                 SizedBox(
                     height: 12,
@@ -442,24 +485,29 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             onPressed: () {
               lastStartTime = 0;
               widget.timer.onExecute.add(StopWatchExecute.start);
+              setState(() {});
             },
             child: const Text("开始"),
           ),
           ElevatedButton(
-            onPressed: () {
-              final tlduration = TimelineDuration(
-                  durations.length, lastStartTime, widget.timer.rawTime.value);
-              durations.add(tlduration);
-              lastStartTime = widget.timer.rawTime.value;
-              widget.onCreateLap?.call(tlduration);
-              widget.onSelectLap?.call(durations.length);
-            },
+            onPressed: widget.timer.isRunning
+                ? () {
+                    final tlduration = TimelineDuration(durations.length,
+                        lastStartTime, widget.timer.rawTime.value);
+                    durations.add(tlduration);
+                    lastStartTime = widget.timer.rawTime.value;
+                    widget.onCreateLap?.call(tlduration);
+                    widget.onSelectLap?.call(durations.length);
+                  }
+                : null,
             child: const Text("计次"),
           ),
           ElevatedButton(
-            onPressed: () {
-              lastStartTime = widget.timer.rawTime.value;
-            },
+            onPressed: widget.timer.isRunning
+                ? () {
+                    lastStartTime = widget.timer.rawTime.value;
+                  }
+                : null,
             child: const Text("放弃"),
           ),
           ElevatedButton(
@@ -471,6 +519,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                 lastStartTime = 0;
                 widget.timer.onExecute.add(StopWatchExecute.reset);
                 widget.onReset?.call();
+                setState(() {});
               }
             },
             child: const Text("重置"),
@@ -478,5 +527,13 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
         ],
       ),
     ]);
+  }
+}
+
+extension NoLessThanZero on double {
+  double positiveValueOrZero() {
+    final value = this;
+    if (value >= 0) return value;
+    return 0;
   }
 }

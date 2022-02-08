@@ -52,6 +52,24 @@ class Noticing {
               ],
             ));
   }
+
+  static Future<String?> showInputDialog(BuildContext context, String title) {
+    var text = "";
+    return showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              title: Text(title),
+              content: TextField(
+                onChanged: (value) => text = value,
+                onSubmitted: (value) => Navigator.pop(context, value),
+              ),
+              actions: <Widget>[
+                TextButton(
+                    child: const Text("好"),
+                    onPressed: () => Navigator.pop(context, text)),
+              ],
+            ));
+  }
 }
 
 class TimelineDuration {
@@ -73,3 +91,13 @@ class SelfSignedCertHttpOverrides extends HttpOverrides {
       });
   }
 }
+
+const Map<String, String> NAME_CODE_MAP = {
+  "练习赛": "p",
+  "资格赛": "qm",
+  "四分之一决赛": "qf",
+  "半决赛": "sf",
+  "决赛": "f"
+};
+
+enum MatchPhase { auto, teleop, endgame }
