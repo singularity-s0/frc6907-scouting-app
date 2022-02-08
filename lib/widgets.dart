@@ -60,7 +60,7 @@ class _DynamicScoutingOptionsWidgetState
         return TextFormField(
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
-          initialValue: widgetData.data,
+          initialValue: widgetData.data?.toString(),
           onChanged: (value) => widgetData.data = int.tryParse(value),
           keyboardType: const TextInputType.numberWithOptions(decimal: false),
           validator: (value) =>
@@ -71,7 +71,7 @@ class _DynamicScoutingOptionsWidgetState
         return TextFormField(
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
-          initialValue: widgetData.data,
+          initialValue: widgetData.data?.toString(),
           onChanged: (value) => widgetData.data = double.tryParse(value),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           validator: (value) =>
