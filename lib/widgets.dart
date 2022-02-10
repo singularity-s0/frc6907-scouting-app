@@ -308,7 +308,8 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
         .toList();
   }
 
-  bool get isSessionStarted => widget.timer.rawTime.value > 0;
+  bool get isSessionStarted =>
+      widget.timer.rawTime.value > 0 || widget.timer.isRunning;
 
   @override
   Widget build(BuildContext context) {

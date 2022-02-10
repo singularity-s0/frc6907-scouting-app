@@ -245,6 +245,10 @@ class _HomePageState extends State<HomePage> {
                   saveData();
                   userData.last.startTime = tlduration.start;
                   userData.last.endTime = tlduration.end;
+                  WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+                    // Enable Submit button
+                    setState(() {});
+                  });
                 },
               ),
             ),
@@ -273,40 +277,48 @@ class _HomePageState extends State<HomePage> {
                   child: const Text("确认"),
                 ),
                 ElevatedButton(
-                  onPressed: () async {
-                    saveData();
-                    if (await Noticing.showConfirmationDialog(
-                            context, "数据将会上传到服务器", "提交数据") ==
-                        true) {
-                      try {
-                        final eval = await Noticing.showInputDialog(
-                            context, "评价本场比赛",
-                            maxLength: 250);
-                        if (eval?.isNotEmpty == true) {
-                          await ScoutingRepository.getInstance().postGameSpec(
-                              matchInfo!.team,
-                              matchInfo!.match,
-                              jsonEncode(userData),
-                              eval!);
-                          Noticing.showAlert(context, "数据已经上传", "提交成功");
-                        } else {
-                          Noticing.showAlert(context, "比赛评价不能为空", "无法提交");
-                          return;
-                        }
-                      } catch (error) {
-                        if (error is DioError && error.response?.data != null) {
-                          Noticing.showAlert(context,
-                              (error.response?.data).toString(), error.message);
-                        } else {
-                          if (error is DioError) {
-                            Noticing.showAlert(context, error.message, "错误");
-                          } else {
-                            Noticing.showAlert(context, error.toString(), "错误");
+                  onPressed: _stopWatchTimer.rawTime.value >= MATCH_TIME
+                      ? () async {
+                          saveData();
+                          if (await Noticing.showConfirmationDialog(
+                                  context, "数据将会上传到服务器", "提交数据") ==
+                              true) {
+                            try {
+                              final eval = await Noticing.showInputDialog(
+                                  context, "评价本场比赛",
+                                  maxLength: 250);
+                              if (eval?.isNotEmpty == true) {
+                                await ScoutingRepository.getInstance()
+                                    .postGameSpec(
+                                        matchInfo!.team,
+                                        matchInfo!.match,
+                                        jsonEncode(userData),
+                                        eval!);
+                                Noticing.showAlert(context, "数据已经上传", "提交成功");
+                              } else {
+                                Noticing.showAlert(context, "比赛评价不能为空", "无法提交");
+                                return;
+                              }
+                            } catch (error) {
+                              if (error is DioError &&
+                                  error.response?.data != null) {
+                                Noticing.showAlert(
+                                    context,
+                                    (error.response?.data).toString(),
+                                    error.message);
+                              } else {
+                                if (error is DioError) {
+                                  Noticing.showAlert(
+                                      context, error.message, "错误");
+                                } else {
+                                  Noticing.showAlert(
+                                      context, error.toString(), "错误");
+                                }
+                              }
+                            }
                           }
                         }
-                      }
-                    }
-                  },
+                      : null,
                   child: const Text("提交"),
                 ),
               ],
