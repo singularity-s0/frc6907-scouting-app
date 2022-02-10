@@ -217,6 +217,7 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               child: StopwatchTimeline(
                 timer: _stopWatchTimer,
+                selectedTimelineDuration: currentSelectedLap,
                 onSelectLap: (id) {
                   saveData();
                   setState(
@@ -236,14 +237,14 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
                 onCreateLap: (tlduration) {
-                  currentField.startTime = tlduration.start;
-                  currentField.endTime = tlduration.end;
-                  showSCDataSelector();
+                  saveData();
+                  userData.last.startTime = tlduration.start;
+                  userData.last.endTime = tlduration.end;
                 },
                 onTimerStop: (tlduration) {
-                  currentField.startTime = tlduration.start;
-                  currentField.endTime = tlduration.end;
                   saveData();
+                  userData.last.startTime = tlduration.start;
+                  userData.last.endTime = tlduration.end;
                 },
               ),
             ),
@@ -252,45 +253,66 @@ class _HomePageState extends State<HomePage> {
               child:
                   DynamicScoutingOptionsWidget(fields: currentField.Properties),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    saveData();
+                    if (currentSelectedLap <= userData.length + 1) {
+                      setState(() {
+                        currentSelectedLap++;
+                        if (currentSelectedLap < userData.length) {
+                          currentField = userData[currentSelectedLap];
+                        } else {
+                          showSCDataSelector();
+                        }
+                      });
+                    }
+                  },
+                  child: const Text("确认"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    saveData();
+                    if (await Noticing.showConfirmationDialog(
+                            context, "数据将会上传到服务器", "提交数据") ==
+                        true) {
+                      try {
+                        final eval = await Noticing.showInputDialog(
+                            context, "评价本场比赛",
+                            maxLength: 250);
+                        if (eval?.isNotEmpty == true) {
+                          await ScoutingRepository.getInstance().postGameSpec(
+                              matchInfo!.team,
+                              matchInfo!.match,
+                              jsonEncode(userData),
+                              eval!);
+                          Noticing.showAlert(context, "数据已经上传", "提交成功");
+                        } else {
+                          Noticing.showAlert(context, "比赛评价不能为空", "无法提交");
+                          return;
+                        }
+                      } catch (error) {
+                        if (error is DioError && error.response?.data != null) {
+                          Noticing.showAlert(context,
+                              (error.response?.data).toString(), error.message);
+                        } else {
+                          if (error is DioError) {
+                            Noticing.showAlert(context, error.message, "错误");
+                          } else {
+                            Noticing.showAlert(context, error.toString(), "错误");
+                          }
+                        }
+                      }
+                    }
+                  },
+                  child: const Text("提交"),
+                ),
+              ],
+            )
           ]),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          saveData();
-          if (await Noticing.showConfirmationDialog(
-                  context, "数据将会上传到服务器", "提交数据") ==
-              true) {
-            try {
-              final eval = await Noticing.showInputDialog(context, "评价本场比赛",
-                  maxLength: 250);
-              if (eval?.isNotEmpty == true) {
-                await ScoutingRepository.getInstance().postGameSpec(
-                    matchInfo!.team,
-                    matchInfo!.match,
-                    jsonEncode(userData),
-                    eval!);
-                Noticing.showAlert(context, "数据已经上传", "提交成功");
-              } else {
-                Noticing.showAlert(context, "比赛评价不能为空", "无法提交");
-                return;
-              }
-            } catch (error) {
-              if (error is DioError && error.response?.data != null) {
-                Noticing.showAlert(
-                    context, (error.response?.data).toString(), error.message);
-              } else {
-                if (error is DioError) {
-                  Noticing.showAlert(context, error.message, "错误");
-                } else {
-                  Noticing.showAlert(context, error.toString(), "错误");
-                }
-              }
-            }
-          }
-        },
-        tooltip: '保存',
-        child: const Icon(Icons.save),
       ),
     );
   }

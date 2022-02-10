@@ -203,12 +203,12 @@ class RadioButtonHostState extends State<RadioButtonHost> {
 
 class StopwatchTimeline extends StatefulWidget {
   final StopWatchTimer timer;
+  final int? selectedTimelineDuration;
 
   /// Called every time user taps on a lap
   final void Function(int)? onSelectLap;
 
   /// This is called every time the user taps on the Lap button
-  /// [onSelectLap] is always called immediately after. So there is no need to manually call this function.
   final void Function(TimelineDuration)? onCreateLap;
   final void Function(TimelineDuration)? onTimerStop;
 
@@ -221,7 +221,8 @@ class StopwatchTimeline extends StatefulWidget {
       this.onSelectLap,
       this.onReset,
       this.onCreateLap,
-      this.onTimerStop})
+      this.onTimerStop,
+      this.selectedTimelineDuration})
       : super(key: key);
 
   @override
@@ -249,10 +250,15 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                         width: SEPERATOR_WIDTH, height: constraints.maxHeight),
                   ),
                   ColoredBox(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .secondary
-                        .withOpacity(0.2),
+                    color: widget.selectedTimelineDuration != e.id
+                        ? Theme.of(context)
+                            .colorScheme
+                            .secondary
+                            .withOpacity(0.2)
+                        : Theme.of(context)
+                            .colorScheme
+                            .primary
+                            .withOpacity(0.4),
                     child: SizedBox(
                       width: (constraints.maxWidth *
                                   (e.end - e.start) /
@@ -301,6 +307,8 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
         )
         .toList();
   }
+
+  bool get isSessionStarted => widget.timer.rawTime.value > 0;
 
   @override
   Widget build(BuildContext context) {
@@ -395,10 +403,18 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                                                       constraints.maxHeight),
                                             ),
                                             ColoredBox(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withOpacity(0.4),
+                                              color:
+                                                  (widget.selectedTimelineDuration ??
+                                                              0) <
+                                                          durations.length
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .secondary
+                                                          .withOpacity(0.2)
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .primary
+                                                          .withOpacity(0.4),
                                               child: SizedBox(
                                                 width: (constraints.maxWidth *
                                                             (value -
@@ -483,11 +499,13 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           ElevatedButton(
-            onPressed: () {
-              lastStartTime = 0;
-              widget.timer.onExecute.add(StopWatchExecute.start);
-              setState(() {});
-            },
+            onPressed: isSessionStarted
+                ? null
+                : () {
+                    lastStartTime = 0;
+                    widget.timer.onExecute.add(StopWatchExecute.start);
+                    setState(() {});
+                  },
             child: const Text("开始"),
           ),
           ElevatedButton(
@@ -498,7 +516,6 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     durations.add(tlduration);
                     lastStartTime = widget.timer.rawTime.value;
                     widget.onCreateLap?.call(tlduration);
-                    widget.onSelectLap?.call(durations.length);
                   }
                 : null,
             child: const Text("计次"),
