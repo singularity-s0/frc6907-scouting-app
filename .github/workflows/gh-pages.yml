@@ -24,7 +24,9 @@ jobs:
           mkdir -p build/web
           cd build/web
           git clone --branch gh-pages --single-branch https://github.com/singularity-s0/frc6907-scouting-app.git
+          cd ../..
           flutter build web --release --web-renderer html
+          cd build/web
           git add -A
           git commit -m 'gh-action deploy'
           git push -f gh-pages
