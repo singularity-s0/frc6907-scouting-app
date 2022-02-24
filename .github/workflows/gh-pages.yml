@@ -26,4 +26,4 @@ jobs:
           git init -b gh-pages
           git add -A
           git commit -m 'gh-action deploy'
-          git push -f -b gh-pages
+          git push -f gh-pages
