@@ -21,6 +21,7 @@ jobs:
       
       - name: Build & Upload
         run: |
+          mkdir -p build/web
           cd build/web
           git clone --branch gh-pages --single-branch https://github.com/singularity-s0/frc6907-scouting-app.git
           flutter build web --release --web-renderer html
