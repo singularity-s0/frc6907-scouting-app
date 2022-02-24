@@ -23,7 +23,7 @@ jobs:
         run: |
           flutter build web --release --web-renderer html
           cd build/web
-          git add .
+          git add -A
           git commit -m 'gh-action deploy'
           git remote add origin https://github.com/singularity-s0/frc6907-scouting-app.git
           git push -f -u origin gh-pages
