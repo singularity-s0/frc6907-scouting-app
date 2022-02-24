@@ -21,9 +21,9 @@ jobs:
       
       - name: Build & Upload
         run: |
-          flutter build web --release --web-renderer html
           cd build/web
-          git remote add origin https://github.com/singularity-s0/frc6907-scouting-app.git
+          git clone --branch gh-pages --single-branch https://github.com/singularity-s0/frc6907-scouting-app.git
+          flutter build web --release --web-renderer html
           git add -A
           git commit -m 'gh-action deploy'
-          git push -f -u origin gh-pages
+          git push -f gh-pages
