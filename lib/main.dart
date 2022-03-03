@@ -311,11 +311,8 @@ class _HomePageState extends State<HomePage> {
                                   maxLength: 250);
                               if (eval?.isNotEmpty == true) {
                                 await ScoutingRepository.getInstance()
-                                    .postGameSpec(
-                                        matchInfo!.team,
-                                        matchInfo!.match,
-                                        jsonEncode(userData),
-                                        eval!);
+                                    .postGameSpec(matchInfo!.team,
+                                        matchInfo!.match, userData, eval!);
                                 Noticing.showAlert(context, "数据已经上传", "提交成功");
                               } else {
                                 Noticing.showAlert(context, "比赛评价不能为空", "无法提交");
