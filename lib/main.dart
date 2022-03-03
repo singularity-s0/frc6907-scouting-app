@@ -109,8 +109,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> showMatchStringDialog(BuildContext context) async {
-    matchInfo = await Noticing.showMatchStringInput(context);
+  Future<void> showMatchStringDialog(BuildContext context,
+      {bool canDismiss = false}) async {
+    final info =
+        await Noticing.showMatchStringInput(context, canDismiss: canDismiss);
+    if (info != null) matchInfo = info;
     setState(() {
       title = "${matchInfo?.team} ${matchInfo?.match}";
     });
@@ -180,7 +183,12 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: GestureDetector(
+          child: Text(title),
+          onTap: () {
+            showMatchStringDialog(context, canDismiss: true);
+          },
+        ),
         actions: [
           TextButton(
               onPressed: showSCDataSelector,
@@ -231,7 +239,8 @@ class _HomePageState extends State<HomePage> {
                     },
                   );
                 },
-                onReset: () {
+                onReset: () async {
+                  await showMatchStringDialog(context, canDismiss: true);
                   setState(() {
                     currentSelectedLap = 0;
                     userData.clear();
