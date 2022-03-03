@@ -22,6 +22,19 @@ import 'package:json_annotation/json_annotation.dart';
 part 'models.g.dart';
 
 @JsonSerializable()
+class SCTimelineItem {
+  SCData? data;
+  int? startTime;
+  int? endTime;
+
+  factory SCTimelineItem.fromJson(Map<String, dynamic> json) =>
+      _$SCTimelineItemFromJson(json);
+  factory SCTimelineItem.empty() => SCTimelineItem(null, null, null);
+  SCTimelineItem(this.data, this.startTime, this.endTime);
+  Map<String, dynamic> toJson() => _$SCTimelineItemToJson(this);
+}
+
+@JsonSerializable()
 class SCData {
   final String ItemEng;
   final String ItemChn;
@@ -29,8 +42,6 @@ class SCData {
   final bool Teleop;
   final bool Endgame;
   final List<SCField> Properties;
-  int? startTime;
-  int? endTime;
 
   factory SCData.fromJson(Map<String, dynamic> json) => _$SCDataFromJson(json);
   SCData(this.ItemEng, this.ItemChn, this.Auto, this.Teleop, this.Endgame,

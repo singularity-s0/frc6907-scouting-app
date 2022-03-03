@@ -80,7 +80,7 @@ class _HomePageState extends State<HomePage> {
 
   /// Storage for all data involved during scouting
   /// The index of the list is the lap ID
-  List<SCData> userData = [];
+  List<SCTimelineItem> userData = [];
 
   final StopWatchTimer _stopWatchTimer =
       StopWatchTimer(mode: StopWatchMode.countUp);
@@ -134,16 +134,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void saveData() {
-    if (currentSelectedLap == userData.length) {
-      userData.add(currentField);
-    } else {
-      userData[currentSelectedLap] = currentField;
-    }
+    assert(userData.length > currentSelectedLap);
+    userData[currentSelectedLap].data = currentField;
   }
 
   void showSCDataSelector() {
     bool isCurrentPhase(SCData scData) {
-      final phase = MatchPhase.fromTime(_stopWatchTimer.rawTime.value);
+      final phase = MatchPhase.fromTime(
+          currentSelectedLapStartTime ?? _stopWatchTimer.rawTime.value);
       switch (phase) {
         case MatchPhase.auto:
           return scData.Auto;
@@ -177,6 +175,10 @@ class _HomePageState extends State<HomePage> {
                     .toList(),
               );
             }));
+  }
+
+  int? get currentSelectedLapStartTime {
+    return userData[currentSelectedLap].startTime;
   }
 
   @override
@@ -233,8 +235,8 @@ class _HomePageState extends State<HomePage> {
                   setState(
                     () {
                       currentSelectedLap = id;
-                      if (id < userData.length) {
-                        currentField = userData[id];
+                      if (userData[id].data != null) {
+                        currentField = userData[id].data!;
                       }
                     },
                   );
@@ -247,15 +249,19 @@ class _HomePageState extends State<HomePage> {
                     currentField = SCData.fromJson(fields_json.first);
                   });
                 },
-                onCreateLap: (tlduration) {
+                onLapCreationCompleted: (tlduration) {
                   saveData();
                   userData.last.startTime = tlduration.start;
                   userData.last.endTime = tlduration.end;
                 },
+                onLapCreationStarted: (newStartTime) {
+                  userData.add(SCTimelineItem.empty());
+                  userData.last.startTime = newStartTime;
+                },
+                onLapCreationAborted: (newStartTime) {
+                  userData.last.startTime = newStartTime;
+                },
                 onTimerStop: (tlduration) {
-                  saveData();
-                  userData.last.startTime = tlduration.start;
-                  userData.last.endTime = tlduration.end;
                   WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
                     // Enable Submit button
                     setState(() {});
@@ -277,11 +283,11 @@ class _HomePageState extends State<HomePage> {
                   onPressed: () {
                     if (mainFormKey.currentState?.validate() == true) {
                       saveData();
-                      if (currentSelectedLap <= userData.length + 1) {
+                      if (currentSelectedLap + 1 < userData.length) {
                         setState(() {
                           currentSelectedLap++;
-                          if (currentSelectedLap < userData.length) {
-                            currentField = userData[currentSelectedLap];
+                          if (userData[currentSelectedLap].data != null) {
+                            currentField = userData[currentSelectedLap].data!;
                           } else {
                             showSCDataSelector();
                           }

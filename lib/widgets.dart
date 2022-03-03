@@ -59,6 +59,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
       case 'int':
       case 'team':
         return TextFormField(
+          key: UniqueKey(),
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
           initialValue: widgetData.data?.toString(),
@@ -70,6 +71,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
         );
       case 'double':
         return TextFormField(
+          key: UniqueKey(),
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
           initialValue: widgetData.data?.toString(),
@@ -82,6 +84,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
       case 'text':
         widgetData.data ??= "";
         return TextFormField(
+          key: UniqueKey(),
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
           initialValue: widgetData.data,
@@ -93,6 +96,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
         widgetData.data ??= false;
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Checkbox(
+              key: UniqueKey(),
               value: widgetData.data ?? false,
               onChanged: enabled
                   ? (value) => setState(() {
@@ -106,6 +110,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
         ]);
       case 'option':
         return FormField(
+          key: UniqueKey(),
           validator: (value) => widgetData.data == null ? "请选择选项" : null,
           builder: (state) => Column(
             mainAxisSize: MainAxisSize.min,
@@ -149,6 +154,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Radio(
+              key: UniqueKey(),
               value: widgetData.name,
               groupValue: radioButtonHostState.currentSelection,
               onChanged: enabled
@@ -225,8 +231,14 @@ class StopwatchTimeline extends StatefulWidget {
   /// Called every time user taps on a lap
   final void Function(int)? onSelectLap;
 
-  /// This is called every time the user taps on the Lap button
-  final void Function(TimelineDuration)? onCreateLap;
+  final void Function(int)? onLapCreationStarted;
+
+  final void Function(int)? onLapCreationAborted;
+
+  /// This is called every time the user taps on the Lap button and when the timer starts
+  final void Function(TimelineDuration)? onLapCreationCompleted;
+
+  /// Called when the timer stops. Note that [onLapCreationCompleted] will also be called so there is no need to call that manually.
   final void Function(TimelineDuration)? onTimerStop;
 
   /// Called when user resets the stopwatch
@@ -237,9 +249,11 @@ class StopwatchTimeline extends StatefulWidget {
       required this.timer,
       this.onSelectLap,
       this.onReset,
-      this.onCreateLap,
+      this.onLapCreationCompleted,
       this.onTimerStop,
-      this.selectedTimelineDuration})
+      this.selectedTimelineDuration,
+      this.onLapCreationStarted,
+      this.onLapCreationAborted})
       : super(key: key);
 
   @override
@@ -344,6 +358,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
               durations.add(tlduration);
               lastStartTime = value;
               widget.onTimerStop?.call(tlduration);
+              widget.onLapCreationCompleted?.call(tlduration);
               WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
                 // Disable buttons
                 setState(() {});
@@ -522,6 +537,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                 : () {
                     lastStartTime = 0;
                     widget.timer.onExecute.add(StopWatchExecute.start);
+                    widget.onLapCreationStarted?.call(lastStartTime);
                     setState(() {});
                   },
             child: const Text("开始"),
@@ -533,7 +549,8 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                         lastStartTime, widget.timer.rawTime.value);
                     durations.add(tlduration);
                     lastStartTime = widget.timer.rawTime.value;
-                    widget.onCreateLap?.call(tlduration);
+                    widget.onLapCreationCompleted?.call(tlduration);
+                    widget.onLapCreationStarted?.call(lastStartTime);
                   }
                 : null,
             child: const Text("计次"),
@@ -542,6 +559,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             onPressed: widget.timer.isRunning
                 ? () {
                     lastStartTime = widget.timer.rawTime.value;
+                    widget.onLapCreationAborted?.call(lastStartTime);
                   }
                 : null,
             child: const Text("放弃"),

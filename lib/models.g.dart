@@ -6,6 +6,22 @@ part of 'models.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+SCTimelineItem _$SCTimelineItemFromJson(Map<String, dynamic> json) =>
+    SCTimelineItem(
+      json['data'] == null
+          ? null
+          : SCData.fromJson(json['data'] as Map<String, dynamic>),
+      json['startTime'] as int?,
+      json['endTime'] as int?,
+    );
+
+Map<String, dynamic> _$SCTimelineItemToJson(SCTimelineItem instance) =>
+    <String, dynamic>{
+      'data': instance.data,
+      'startTime': instance.startTime,
+      'endTime': instance.endTime,
+    };
+
 SCData _$SCDataFromJson(Map<String, dynamic> json) => SCData(
       json['ItemEng'] as String,
       json['ItemChn'] as String,
@@ -15,9 +31,7 @@ SCData _$SCDataFromJson(Map<String, dynamic> json) => SCData(
       (json['Properties'] as List<dynamic>)
           .map((e) => SCField.fromJson(e as Map<String, dynamic>))
           .toList(),
-    )
-      ..startTime = json['startTime'] as int?
-      ..endTime = json['endTime'] as int?;
+    );
 
 Map<String, dynamic> _$SCDataToJson(SCData instance) => <String, dynamic>{
       'ItemEng': instance.ItemEng,
@@ -26,8 +40,6 @@ Map<String, dynamic> _$SCDataToJson(SCData instance) => <String, dynamic>{
       'Teleop': instance.Teleop,
       'Endgame': instance.Endgame,
       'Properties': instance.Properties,
-      'startTime': instance.startTime,
-      'endTime': instance.endTime,
     };
 
 SCField _$SCFieldFromJson(Map<String, dynamic> json) => SCField(
