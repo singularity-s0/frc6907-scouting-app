@@ -19,11 +19,12 @@ jobs:
         run: |
           flutter pub get
       
-      - name: Build & Upload
+      - name: Build
         run: |
-          flutter build web --release --web-renderer html
-          cd build/web
-          git add -A
-          git commit -m 'gh-action deploy'
-          git remote add origin https://github.com/singularity-s0/frc6907-scouting-app.git
-          git push -f -u origin gh-pages
+          flutter build web --release
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.2.5
+        with:
+          branch: gh-pages
+          folder: build/web
