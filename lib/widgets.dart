@@ -24,19 +24,21 @@ import 'package:stop_watch_timer/stop_watch_timer.dart';
 
 const MATCH_TIME = 150000;
 
-class DynamicScoutingOptionsWidget extends StatefulWidget {
-  const DynamicScoutingOptionsWidget({Key? key, required this.fields})
+class ScoutingFieldsForm extends StatefulWidget {
+  const ScoutingFieldsForm(
+      {Key? key, required this.fields, required this.formKey})
       : super(key: key);
 
   final List<SCField> fields;
 
+  /// A [GlobalKey] for the [Form] of this widget. It can be used to validate the input before submitting.
+  final GlobalKey<FormState> formKey;
+
   @override
-  State<DynamicScoutingOptionsWidget> createState() =>
-      _DynamicScoutingOptionsWidgetState();
+  State<ScoutingFieldsForm> createState() => _ScoutingFieldsFormState();
 }
 
-class _DynamicScoutingOptionsWidgetState
-    extends State<DynamicScoutingOptionsWidget> {
+class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
   late List<SCField> fields;
 
   @override
@@ -46,7 +48,7 @@ class _DynamicScoutingOptionsWidgetState
   }
 
   @override
-  void didUpdateWidget(covariant DynamicScoutingOptionsWidget oldWidget) {
+  void didUpdateWidget(covariant ScoutingFieldsForm oldWidget) {
     super.didUpdateWidget(oldWidget);
     fields = widget.fields;
   }
@@ -78,13 +80,17 @@ class _DynamicScoutingOptionsWidgetState
           autovalidateMode: AutovalidateMode.onUserInteraction,
         );
       case 'text':
+        widgetData.data ??= "";
         return TextFormField(
           enabled: enabled,
           decoration: InputDecoration(labelText: widgetData.name),
           initialValue: widgetData.data,
           onChanged: (value) => widgetData.data = value,
+          //validator: (value) => value?.isNotEmpty == true ? null : "请输入内容",
+          //autovalidateMode: AutovalidateMode.onUserInteraction,
         );
       case 'boolean':
+        widgetData.data ??= false;
         return Row(mainAxisSize: MainAxisSize.min, children: [
           Checkbox(
               value: widgetData.data ?? false,
@@ -99,32 +105,40 @@ class _DynamicScoutingOptionsWidgetState
                   : TextStyle(color: Theme.of(context).hintColor)),
         ]);
       case 'option':
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widgetData.name),
-            Padding(
-              padding: const EdgeInsets.only(left: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  RadioButtonHost(
-                    widgetData: widgetData,
-                    child: Builder(
-                      builder: (context) => Wrap(
-                          alignment: WrapAlignment.spaceBetween,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: widgetData.sons
-                              .map((e) => createWidget(context, e, enabled))
-                              .toList()),
+        return FormField(
+          validator: (value) => widgetData.data == null ? "请选择选项" : null,
+          builder: (state) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widgetData.name),
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    RadioButtonHost(
+                      widgetData: widgetData,
+                      child: Builder(
+                        builder: (context) => Wrap(
+                            alignment: WrapAlignment.spaceBetween,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: widgetData.sons
+                                .map((e) => createWidget(context, e, enabled))
+                                .toList()),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            )
-          ],
+                    if (state.hasError)
+                      Text(
+                        state.errorText ?? "错误",
+                        style: TextStyle(color: Theme.of(context).errorColor),
+                      )
+                  ],
+                ),
+              )
+            ],
+          ),
         );
       case 'option_child':
       case 'null':
@@ -174,8 +188,11 @@ class _DynamicScoutingOptionsWidgetState
       widgets.add(createWidget(context, field.root));
       widgets.add(const Divider());
     }
-    return Column(
-        crossAxisAlignment: CrossAxisAlignment.start, children: widgets);
+    return Form(
+      key: widget.formKey,
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, children: widgets),
+    );
   }
 }
 

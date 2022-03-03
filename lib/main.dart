@@ -68,6 +68,8 @@ class _HomePageState extends State<HomePage> {
   late String title;
   MatchInfo? matchInfo;
 
+  GlobalKey<FormState> mainFormKey = GlobalKey<FormState>();
+
   /// Since Dart does not support object cloning,
   /// we store fields in JSON format and create instances of SCData only when needed
   /// so that we can have multiple instances of the same SCData
@@ -254,24 +256,28 @@ class _HomePageState extends State<HomePage> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              child:
-                  DynamicScoutingOptionsWidget(fields: currentField.Properties),
+              child: ScoutingFieldsForm(
+                fields: currentField.Properties,
+                formKey: mainFormKey,
+              ),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    saveData();
-                    if (currentSelectedLap <= userData.length + 1) {
-                      setState(() {
-                        currentSelectedLap++;
-                        if (currentSelectedLap < userData.length) {
-                          currentField = userData[currentSelectedLap];
-                        } else {
-                          showSCDataSelector();
-                        }
-                      });
+                    if (mainFormKey.currentState?.validate() == true) {
+                      saveData();
+                      if (currentSelectedLap <= userData.length + 1) {
+                        setState(() {
+                          currentSelectedLap++;
+                          if (currentSelectedLap < userData.length) {
+                            currentField = userData[currentSelectedLap];
+                          } else {
+                            showSCDataSelector();
+                          }
+                        });
+                      }
                     }
                   },
                   child: const Text("确认"),
@@ -279,10 +285,11 @@ class _HomePageState extends State<HomePage> {
                 ElevatedButton(
                   onPressed: _stopWatchTimer.rawTime.value >= MATCH_TIME
                       ? () async {
-                          saveData();
-                          if (await Noticing.showConfirmationDialog(
-                                  context, "数据将会上传到服务器", "提交数据") ==
-                              true) {
+                          if (mainFormKey.currentState?.validate() == true &&
+                              await Noticing.showConfirmationDialog(
+                                      context, "数据将会上传到服务器", "提交数据") ==
+                                  true) {
+                            saveData();
                             try {
                               final eval = await Noticing.showInputDialog(
                                   context, "评价本场比赛",
