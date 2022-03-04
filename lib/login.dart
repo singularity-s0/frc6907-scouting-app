@@ -36,7 +36,7 @@ class LoginDialog extends StatefulWidget {
 
 class _LoginDialogState extends State<LoginDialog> {
   final TextEditingController _ipController =
-      TextEditingController(text: "https://124.223.41.26:8000");
+      TextEditingController(text: "https://sc.6907goat.cc:8000");
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _pwdController = TextEditingController();
 

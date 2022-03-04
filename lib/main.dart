@@ -30,7 +30,7 @@ import 'package:stop_watch_timer/stop_watch_timer.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  HttpOverrides.global = SelfSignedCertHttpOverrides();
+  //HttpOverrides.global = SelfSignedCertHttpOverrides();
   runApp(const ScountingApp());
 }
 

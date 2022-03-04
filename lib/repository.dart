@@ -22,7 +22,7 @@ class ScoutingRepository {
 
   factory ScoutingRepository.getInstance() => _instance;
 
-  String BASE_URL = "https://124.223.41.26:8000";
+  String BASE_URL = "";
 
   late Dio dio;
   String? _token;
