@@ -19884,7 +19884,7 @@ _.c=c
 _.d=null},
 a7d:function a7d(){},
 a7e:function a7e(){},
-a2u:function a2u(){this.a="https://124.223.41.26:8000"
+a2u:function a2u(){this.a=""
 this.b=$
 this.c=null},
 lg(a,b,c){return A.RF(!0,new A.a_l(c,b),a,t.z)},
@@ -66498,7 +66498,7 @@ l6(a){return this.dl(a,null)},
 ck(a){return this.a.a4T()},
 $ibZ:1}
 A.n1.prototype={
-aq(){return new A.Na(A.a6_("https://124.223.41.26:8000"),A.a6_(null),A.a6_(null),B.j)}}
+aq(){return new A.Na(A.a6_("https://sc.6907goat.cc:8000"),A.a6_(null),A.a6_(null),B.j)}}
 A.Zi.prototype={
 $1(a){return B.Fg},
 $S:398}
