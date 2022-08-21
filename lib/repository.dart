@@ -72,7 +72,7 @@ class ScoutingRepository {
 
   Future<void> postGameSpec(
       int team, String match, dynamic gameData, String evaluation) async {
-    await dio.post(BASE_URL + "/api/gamespec/add",
+    await dio.post(BASE_URL + "/scouting/match/update",
         data: {
           "team": team,
           "match": match,
