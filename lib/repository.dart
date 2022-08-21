@@ -48,7 +48,7 @@ class ScoutingRepository {
   }
 
   Future<String?> login(String username, String password) async {
-    final response = await dio.post(BASE_URL + "/token/", data: {
+    final response = await dio.post(BASE_URL + "/token", data: {
       "username": username,
       "password": password,
     });
@@ -56,9 +56,10 @@ class ScoutingRepository {
   }
 
   Future<List?> loadInGameJson() async {
-    final response = await dio.get(BASE_URL + "/api/ingameitem/get",
+    final response = await dio.get(BASE_URL + "/template/",
         queryParameters: {}, options: Options(headers: _tokenHeader));
-    final List result = response.data['data'];
+    // final List result = response.data['data'];
+    final List result = response.data;
     return result;
     //return result.map((e) => SCData.fromJson(e)).toList();
   }
@@ -73,10 +74,10 @@ class ScoutingRepository {
       int team, String match, dynamic gameData, String evaluation) async {
     await dio.post(BASE_URL + "/api/gamespec/add",
         data: {
-          "TeamNumber": team,
-          "Match": match,
-          "IngameData": gameData,
-          "Evaluation": evaluation,
+          "team": team,
+          "match": match,
+          "gamedata": gameData,
+          "evaluation": evaluation,
         },
         options: Options(headers: _tokenHeader));
   }
