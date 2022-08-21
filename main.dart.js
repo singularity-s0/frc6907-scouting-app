@@ -68999,7 +68999,7 @@ ab5(a,b,c,d){var s=0,r=A.a0(t.H),q=this,p
 var $async$vL=A.a1(function(e,f){if(e===1)return A.Y(f,r)
 while(true)switch(s){case 0:p=t.z
 s=2
-return A.X(A.a(q.b,"dio").Nt(q.a+"/api/gamespec/add",A.ax(["team",a,"match",b,"gamedata",c,"evaluation",d],t.N,p),A.aiN(q.gJi()),p),$async$vL)
+return A.X(A.a(q.b,"dio").Nt(q.a+"/scouting/match/update",A.ax(["team",a,"match",b,"gamedata",c,"evaluation",d],t.N,p),A.aiN(q.gJi()),p),$async$vL)
 case 2:return A.Z(null,r)}})
 return A.a_($async$vL,r)}}
 A.a0o.prototype={
