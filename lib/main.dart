@@ -127,7 +127,13 @@ class _HomePageState extends State<HomePage> {
     fields_json =
         (await ScoutingRepository.getInstance().loadInGameJson()) ?? [];
     setState(() {
-      currentField = SCData.fromJson(fields_json.first);
+      try {
+        currentField = fields_json
+            .map((e) => SCData.fromJson(e))
+            .firstWhere((element) => element.Auto);
+      } catch (e) {
+        currentField = SCData.fromJson(fields_json.first);
+      }
     });
   }
 
@@ -247,7 +253,13 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     currentSelectedLap = 0;
                     userData.clear();
-                    currentField = SCData.fromJson(fields_json.first);
+                    try {
+                      currentField = fields_json
+                          .map((e) => SCData.fromJson(e))
+                          .firstWhere((element) => element.Auto);
+                    } catch (e) {
+                      currentField = SCData.fromJson(fields_json.first);
+                    }
                   });
                 },
                 onLapCreationCompleted: (tlduration) {
