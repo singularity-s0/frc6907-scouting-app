@@ -176,11 +176,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   int? get currentSelectedLapStartTime {
-    try {
-      return userData[currentSelectedLap].startTime;
-    } catch (e) {
+    if (currentSelectedLap >= userData.length) {
       return null;
     }
+    return userData[currentSelectedLap].startTime;
   }
 
   @override
