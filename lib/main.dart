@@ -16,8 +16,6 @@
  */
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -94,7 +92,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> initialize() async {
     if (!ScoutingRepository.getInstance().isUserInitialized) {
-      WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
         await LoginDialog.showLoginDialog(context);
         await loadData();
         if (matchInfo == null) {
@@ -178,7 +176,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   int? get currentSelectedLapStartTime {
-    return userData[currentSelectedLap].startTime;
+    try {
+      return userData[currentSelectedLap].startTime;
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
@@ -262,7 +264,7 @@ class _HomePageState extends State<HomePage> {
                   userData.last.startTime = newStartTime;
                 },
                 onTimerStop: (tlduration) {
-                  WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+                  WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                     // Enable Submit button
                     setState(() {});
                   });

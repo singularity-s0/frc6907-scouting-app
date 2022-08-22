@@ -16,11 +16,9 @@
  */
 
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:scouting_6907/repository.dart';
 
 class Noticing {
   static showAlert(BuildContext context, String message, String title) {

@@ -65,7 +65,7 @@ class SCField {
 class SCWidget {
   final String name;
   final String? type;
-  final List<SCWidget> sons;
+  final List<SCWidget>? sons;
   dynamic data;
 
   SCWidget(this.name, this.type, this.sons);

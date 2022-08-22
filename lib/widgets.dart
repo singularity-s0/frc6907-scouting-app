@@ -15,8 +15,6 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:scouting_6907/models.dart';
 import 'package:scouting_6907/utils.dart';
@@ -129,9 +127,11 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
                         builder: (context) => Wrap(
                             alignment: WrapAlignment.spaceBetween,
                             crossAxisAlignment: WrapCrossAlignment.center,
-                            children: widgetData.sons
-                                .map((e) => createWidget(context, e, enabled))
-                                .toList()),
+                            children: (widgetData.sons
+                                    ?.map((e) =>
+                                        createWidget(context, e, enabled))
+                                    .toList()) ??
+                                [const Text("数据格式错误 RadioHost 必须具有 sons")]),
                       ),
                     ),
                     if (state.hasError)
@@ -169,10 +169,10 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
                 style: enabled
                     ? null
                     : TextStyle(color: Theme.of(context).hintColor)),
-            if (widgetData.sons.isNotEmpty)
+            if (widgetData.sons?.isNotEmpty == true)
               Wrap(
                 crossAxisAlignment: WrapCrossAlignment.center,
-                children: widgetData.sons
+                children: widgetData.sons!
                     .map((e) => createWidget(
                         context,
                         e,
@@ -183,7 +183,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
           ],
         );
     }
-    return const Text("未知控件类型：请更新软件");
+    return Text("未知控件类型${widgetData.type}：请更新软件");
   }
 
   @override
@@ -359,7 +359,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
               lastStartTime = value;
               widget.onTimerStop?.call(tlduration);
               widget.onLapCreationCompleted?.call(tlduration);
-              WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                 // Disable buttons
                 setState(() {});
               });

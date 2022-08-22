@@ -57,8 +57,8 @@ Map<String, dynamic> _$SCFieldToJson(SCField instance) => <String, dynamic>{
 SCWidget _$SCWidgetFromJson(Map<String, dynamic> json) => SCWidget(
       json['name'] as String,
       json['type'] as String?,
-      (json['sons'] as List<dynamic>)
-          .map((e) => SCWidget.fromJson(e as Map<String, dynamic>))
+      (json['sons'] as List<dynamic>?)
+          ?.map((e) => SCWidget.fromJson(e as Map<String, dynamic>))
           .toList(),
     )..data = json['data'];
 
