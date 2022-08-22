@@ -224,8 +224,8 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(children: [
+        child: Column(
+          children: [
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               child: StopwatchTimeline(
@@ -270,80 +270,98 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              child: ScoutingFieldsForm(
-                fields: currentField.Properties,
-                formKey: mainFormKey,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    if (mainFormKey.currentState?.validate() == true) {
-                      saveData();
-                      if (currentSelectedLap + 1 < userData.length) {
-                        setState(() {
-                          currentSelectedLap++;
-                          if (userData[currentSelectedLap].data != null) {
-                            currentField = userData[currentSelectedLap].data!;
-                          } else {
-                            showSCDataSelector();
-                          }
-                        });
-                      }
-                    }
-                  },
-                  child: const Text("确认"),
-                ),
-                ElevatedButton(
-                  onPressed: _stopWatchTimer.rawTime.value >= MATCH_TIME
-                      ? () async {
-                          if (mainFormKey.currentState?.validate() == true &&
-                              await Noticing.showConfirmationDialog(
-                                      context, "数据将会上传到服务器", "提交数据") ==
-                                  true) {
-                            saveData();
-                            try {
-                              final eval = await Noticing.showInputDialog(
-                                  context, "评价本场比赛",
-                                  maxLength: 250);
-                              if (eval?.isNotEmpty == true) {
-                                await ScoutingRepository.getInstance()
-                                    .postGameSpec(matchInfo!.team,
-                                        matchInfo!.match, userData, eval!);
-                                Noticing.showAlert(context, "数据已经上传", "提交成功");
-                              } else {
-                                Noticing.showAlert(context, "比赛评价不能为空", "无法提交");
-                                return;
-                              }
-                            } catch (error) {
-                              if (error is DioError &&
-                                  error.response?.data != null) {
-                                Noticing.showAlert(
-                                    context,
-                                    (error.response?.data).toString(),
-                                    error.message);
-                              } else {
-                                if (error is DioError) {
-                                  Noticing.showAlert(
-                                      context, error.message, "错误");
-                                } else {
-                                  Noticing.showAlert(
-                                      context, error.toString(), "错误");
-                                }
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 16),
+                      child: ScoutingFieldsForm(
+                        fields: currentField.Properties,
+                        formKey: mainFormKey,
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            if (mainFormKey.currentState?.validate() == true) {
+                              saveData();
+                              if (currentSelectedLap + 1 < userData.length) {
+                                setState(() {
+                                  currentSelectedLap++;
+                                  if (userData[currentSelectedLap].data !=
+                                      null) {
+                                    currentField =
+                                        userData[currentSelectedLap].data!;
+                                  } else {
+                                    showSCDataSelector();
+                                  }
+                                });
                               }
                             }
-                          }
-                        }
-                      : null,
-                  child: const Text("提交"),
+                          },
+                          child: const Text("确认"),
+                        ),
+                        ElevatedButton(
+                          onPressed: _stopWatchTimer.rawTime.value >= MATCH_TIME
+                              ? () async {
+                                  if (mainFormKey.currentState?.validate() ==
+                                          true &&
+                                      await Noticing.showConfirmationDialog(
+                                              context, "数据将会上传到服务器", "提交数据") ==
+                                          true) {
+                                    saveData();
+                                    try {
+                                      final eval =
+                                          await Noticing.showInputDialog(
+                                              context, "评价本场比赛",
+                                              maxLength: 250);
+                                      if (eval?.isNotEmpty == true) {
+                                        await ScoutingRepository.getInstance()
+                                            .postGameSpec(
+                                                matchInfo!.team,
+                                                matchInfo!.match,
+                                                userData,
+                                                eval!);
+                                        Noticing.showAlert(
+                                            context, "数据已经上传", "提交成功");
+                                      } else {
+                                        Noticing.showAlert(
+                                            context, "比赛评价不能为空", "无法提交");
+                                        return;
+                                      }
+                                    } catch (error) {
+                                      if (error is DioError &&
+                                          error.response?.data != null) {
+                                        Noticing.showAlert(
+                                            context,
+                                            (error.response?.data).toString(),
+                                            error.message);
+                                      } else {
+                                        if (error is DioError) {
+                                          Noticing.showAlert(
+                                              context, error.message, "错误");
+                                        } else {
+                                          Noticing.showAlert(
+                                              context, error.toString(), "错误");
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              : null,
+                          child: const Text("提交"),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            )
-          ]),
+              ),
+            ),
+          ],
         ),
       ),
     );
