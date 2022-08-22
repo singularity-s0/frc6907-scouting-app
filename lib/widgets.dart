@@ -59,7 +59,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
         return TextFormField(
           key: UniqueKey(),
           enabled: enabled,
-          decoration: InputDecoration(labelText: widgetData.name),
+          //decoration: InputDecoration(labelText: widgetData.name),
           initialValue: widgetData.data?.toString(),
           onChanged: (value) => widgetData.data = int.tryParse(value),
           keyboardType: const TextInputType.numberWithOptions(decimal: false),
@@ -71,7 +71,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
         return TextFormField(
           key: UniqueKey(),
           enabled: enabled,
-          decoration: InputDecoration(labelText: widgetData.name),
+          //decoration: InputDecoration(labelText: widgetData.name),
           initialValue: widgetData.data?.toString(),
           onChanged: (value) => widgetData.data = double.tryParse(value),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -84,7 +84,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
         return TextFormField(
           key: UniqueKey(),
           enabled: enabled,
-          decoration: InputDecoration(labelText: widgetData.name),
+          //decoration: InputDecoration(labelText: widgetData.name),
           initialValue: widgetData.data,
           onChanged: (value) => widgetData.data = value,
           //validator: (value) => value?.isNotEmpty == true ? null : "请输入内容",
@@ -112,8 +112,6 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(widgetData.name),
-            const SizedBox(width: 8),
             IconButton(
                 icon: const Icon(Icons.remove),
                 onPressed: enabled
@@ -145,39 +143,31 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
         return FormField(
           key: UniqueKey(),
           validator: (value) => widgetData.data == null ? "请选择选项" : null,
-          builder: (state) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(widgetData.name),
-              Padding(
-                padding: const EdgeInsets.only(left: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    RadioButtonHost(
-                      widgetData: widgetData,
-                      child: Builder(
-                        builder: (context) => Wrap(
-                            alignment: WrapAlignment.spaceBetween,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: (widgetData.sons
-                                    ?.map((e) =>
-                                        createWidget(context, e, enabled))
-                                    .toList()) ??
-                                [const Text("数据格式错误 RadioHost 必须具有 sons")]),
-                      ),
-                    ),
-                    if (state.hasError)
-                      Text(
-                        state.errorText ?? "错误",
-                        style: TextStyle(color: Theme.of(context).errorColor),
-                      )
-                  ],
+          builder: (state) => Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                RadioButtonHost(
+                  widgetData: widgetData,
+                  child: Builder(
+                    builder: (context) => Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: (widgetData.sons
+                                ?.map((e) => createWidget(context, e, enabled))
+                                .toList()) ??
+                            [const Text("数据格式错误 RadioHost 必须具有 sons")]),
+                  ),
                 ),
-              )
-            ],
+                if (state.hasError)
+                  Text(
+                    state.errorText ?? "错误",
+                    style: TextStyle(color: Theme.of(context).errorColor),
+                  )
+              ],
+            ),
           ),
         );
       case 'group':
@@ -233,7 +223,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
   Widget build(BuildContext context) {
     List<Widget> widgets = [];
     for (var field in fields) {
-      // widgets.add(Text(field.nameCn));
+      widgets.add(Text(field.nameCn));
       widgets.add(createWidget(context, field.root));
       widgets.add(const Divider());
     }
