@@ -106,6 +106,43 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
                   ? null
                   : TextStyle(color: Theme.of(context).hintColor)),
         ]);
+      case 'count':
+        widgetData.data ??= 0;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(widgetData.name),
+            const SizedBox(width: 8),
+            IconButton(
+                icon: const Icon(Icons.remove),
+                onPressed: enabled
+                    ? () {
+                        setState(() {
+                          widgetData.data ??= 0;
+                          widgetData.data--;
+                        });
+                      }
+                    : null),
+            SizedBox(
+              width: 48,
+              child: Center(
+                child: Text(widgetData.data.toString()),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: enabled
+                    ? () {
+                        setState(() {
+                          widgetData.data ??= 0;
+                          widgetData.data++;
+                        });
+                      }
+                    : null),
+          ],
+        );
       case 'option':
         return FormField(
           key: UniqueKey(),
