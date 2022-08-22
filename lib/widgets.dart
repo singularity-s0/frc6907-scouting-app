@@ -119,7 +119,6 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
                 onPressed: enabled
                     ? () {
                         setState(() {
-                          widgetData.data ??= 0;
                           widgetData.data--;
                         });
                       }
@@ -136,7 +135,6 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
                 onPressed: enabled
                     ? () {
                         setState(() {
-                          widgetData.data ??= 0;
                           widgetData.data++;
                         });
                       }
@@ -182,6 +180,14 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
             ],
           ),
         );
+      case 'group':
+        return Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: (widgetData.sons
+                    ?.map((e) => createWidget(context, e, enabled))
+                    .toList()) ??
+                [const Text("数据格式错误 group 必须具有 sons")]);
       case 'option_child':
       case 'null':
       case null:
