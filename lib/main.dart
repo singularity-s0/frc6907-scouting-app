@@ -16,6 +16,7 @@
  */
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -306,7 +307,10 @@ class _HomePageState extends State<HomePage> {
                   userData.last.startTime = newStartTime;
                 },
                 onLapCreationAborted: (newStartTime) {
-                  userData.last.startTime = newStartTime;
+                  userData.removeLast();
+                  if (currentSelectedLap >= userData.length) {
+                    currentSelectedLap--;
+                  }
                 },
                 onTimerStop: () {
                   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -336,15 +340,17 @@ class _HomePageState extends State<HomePage> {
                           child: const Text("确认"),
                         ),
                         ElevatedButton(
-                          onPressed: _stopWatchTimer.rawTime.value >= MATCH_TIME
+                          onPressed: (_stopWatchTimer.rawTime.value >=
+                                      MATCH_TIME &&
+                                  userData.isNotEmpty &&
+                                  userData.last.endTime != null)
                               ? () async {
-                                  confirmFormData();
                                   if (mainFormKey.currentState?.validate() ==
                                           true &&
                                       await Noticing.showConfirmationDialog(
                                               context, "数据将会上传到服务器", "提交数据") ==
                                           true) {
-                                    saveData();
+                                    confirmFormData();
                                     try {
                                       final eval =
                                           await Noticing.showInputDialog(

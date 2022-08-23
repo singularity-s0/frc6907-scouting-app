@@ -20,7 +20,7 @@ import 'package:scouting_6907/models.dart';
 import 'package:scouting_6907/utils.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
-const MATCH_TIME = 150000;
+const MATCH_TIME = 1500; //00;
 
 class ScoutingFieldsForm extends StatefulWidget {
   const ScoutingFieldsForm(
@@ -599,8 +599,9 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     finalInfoTimelineDurationNotYetCommited)
                 ? () {
                     lastStartTime = widget.timer.rawTime.value;
+                    widget.onLapCreationAborted?.call(lastStartTime);
                     if (widget.timer.isRunning) {
-                      widget.onLapCreationAborted?.call(lastStartTime);
+                      widget.onLapCreationStarted?.call(lastStartTime);
                     } else {
                       setState(() {});
                     }
