@@ -140,6 +140,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
           ],
         );
       case 'option':
+        widgetData.data ??= widgetData.sons?.first.name;
         return FormField(
           key: UniqueKey(),
           validator: (value) => widgetData.data == null ? "请选择选项" : null,
