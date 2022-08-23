@@ -292,7 +292,7 @@ class _HomePageState extends State<HomePage> {
                 onLapCreationAborted: (newStartTime) {
                   userData.last.startTime = newStartTime;
                 },
-                onTimerStop: (tlduration) {
+                onTimerStop: () {
                   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
                     // Enable Submit button
                     setState(() {});

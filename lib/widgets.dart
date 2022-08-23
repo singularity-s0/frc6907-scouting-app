@@ -275,7 +275,7 @@ class StopwatchTimeline extends StatefulWidget {
   final void Function(TimelineDuration)? onLapCreationCompleted;
 
   /// Called when the timer stops. Note that [onLapCreationCompleted] will also be called so there is no need to call that manually.
-  final void Function(TimelineDuration)? onTimerStop;
+  final void Function()? onTimerStop;
 
   /// Called when user resets the stopwatch
   final void Function()? onReset;
@@ -299,6 +299,11 @@ class StopwatchTimeline extends StatefulWidget {
 class StopwatchTimelineState extends State<StopwatchTimeline> {
   int lastStartTime = 0;
   List<TimelineDuration> durations = [];
+
+  /// This bool is an indicator of whether the user has confirmed or dismissed the final duration after the timer stopped
+  /// Used as a signal to disable the 提交/放弃 button
+  bool finalInfoTimelineDurationNotYetCommited = false;
+
   static const double SEPERATOR_WIDTH = 2;
 
   List<Positioned> buildLaps(BoxConstraints constraints) {
@@ -389,16 +394,8 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             if (value >= MATCH_TIME && widget.timer.isRunning) {
               // Stop timer
               widget.timer.onExecute.add(StopWatchExecute.stop);
-              final tlduration =
-                  TimelineDuration(durations.length, lastStartTime, value);
-              durations.add(tlduration);
-              lastStartTime = value;
-              widget.onTimerStop?.call(tlduration);
-              widget.onLapCreationCompleted?.call(tlduration);
-              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-                // Disable buttons
-                setState(() {});
-              });
+              widget.onTimerStop?.call();
+              finalInfoTimelineDurationNotYetCommited = true;
             }
             return Column(
               children: <Widget>[
@@ -579,23 +576,35 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             child: const Text("开始"),
           ),
           ElevatedButton(
-            onPressed: widget.timer.isRunning
+            onPressed: (widget.timer.isRunning ||
+                    finalInfoTimelineDurationNotYetCommited)
                 ? () {
                     final tlduration = TimelineDuration(durations.length,
                         lastStartTime, widget.timer.rawTime.value);
                     durations.add(tlduration);
                     lastStartTime = widget.timer.rawTime.value;
                     widget.onLapCreationCompleted?.call(tlduration);
-                    widget.onLapCreationStarted?.call(lastStartTime);
+                    if (widget.timer.isRunning) {
+                      widget.onLapCreationStarted?.call(lastStartTime);
+                    } else {
+                      setState(() {});
+                    }
+                    finalInfoTimelineDurationNotYetCommited = false;
                   }
                 : null,
             child: const Text("计次"),
           ),
           ElevatedButton(
-            onPressed: widget.timer.isRunning
+            onPressed: (widget.timer.isRunning ||
+                    finalInfoTimelineDurationNotYetCommited)
                 ? () {
                     lastStartTime = widget.timer.rawTime.value;
-                    widget.onLapCreationAborted?.call(lastStartTime);
+                    if (widget.timer.isRunning) {
+                      widget.onLapCreationAborted?.call(lastStartTime);
+                    } else {
+                      setState(() {});
+                    }
+                    finalInfoTimelineDurationNotYetCommited = false;
                   }
                 : null,
             child: const Text("放弃"),
