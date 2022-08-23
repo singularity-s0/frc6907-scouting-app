@@ -190,6 +190,22 @@ class _HomePageState extends State<HomePage> {
     return userData[currentSelectedLap].startTime;
   }
 
+  void confirmFormData() {
+    if (mainFormKey.currentState?.validate() == true) {
+      saveData();
+      if (currentSelectedLap + 1 < userData.length) {
+        setState(() {
+          currentSelectedLap++;
+          if (userData[currentSelectedLap].data != null) {
+            currentField = userData[currentSelectedLap].data!;
+          } else if (_stopWatchTimer.isRunning) {
+            showSCDataSelector();
+          }
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -316,28 +332,13 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            if (mainFormKey.currentState?.validate() == true) {
-                              saveData();
-                              if (currentSelectedLap + 1 < userData.length) {
-                                setState(() {
-                                  currentSelectedLap++;
-                                  if (userData[currentSelectedLap].data !=
-                                      null) {
-                                    currentField =
-                                        userData[currentSelectedLap].data!;
-                                  } else {
-                                    showSCDataSelector();
-                                  }
-                                });
-                              }
-                            }
-                          },
+                          onPressed: confirmFormData,
                           child: const Text("确认"),
                         ),
                         ElevatedButton(
                           onPressed: _stopWatchTimer.rawTime.value >= MATCH_TIME
                               ? () async {
+                                  confirmFormData();
                                   if (mainFormKey.currentState?.validate() ==
                                           true &&
                                       await Noticing.showConfirmationDialog(
