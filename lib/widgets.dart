@@ -584,8 +584,6 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     widget.onLapCreationCompleted?.call(tlduration);
                     if (widget.timer.isRunning) {
                       widget.onLapCreationStarted?.call(lastStartTime);
-                    } else {
-                      setState(() {});
                     }
                     finalInfoTimelineDurationNotYetCommited = false;
                   }
@@ -600,8 +598,6 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     widget.onLapCreationAborted?.call(lastStartTime);
                     if (widget.timer.isRunning) {
                       widget.onLapCreationStarted?.call(lastStartTime);
-                    } else {
-                      setState(() {});
                     }
                     finalInfoTimelineDurationNotYetCommited = false;
                   }

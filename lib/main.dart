@@ -173,7 +173,7 @@ class _HomePageState extends State<HomePage> {
       case MatchPhase.endgame:
         return scData.Endgame;
     }
-    return false;
+    return true;
   }
 
   void showSCDataSelector() {
@@ -317,6 +317,7 @@ class _HomePageState extends State<HomePage> {
                 onLapCreationStarted: (newStartTime) {
                   userData.add(SCTimelineItem.empty());
                   userData.last.startTime = newStartTime;
+                  setState(() {});
                 },
                 onLapCreationAborted: (newStartTime) {
                   if (currentSelectedLap >= userData.length) {
