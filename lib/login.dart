@@ -37,7 +37,8 @@ class LoginDialog extends StatefulWidget {
 class _LoginDialogState extends State<LoginDialog> {
   final TextEditingController _ipController =
       TextEditingController(text: "https://6907goat.cc:8443");
-  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController(
+      text: Settings.getInstance().preferences.getString("username"));
   final TextEditingController _pwdController = TextEditingController();
 
   /// Attempt to log in for verification.
@@ -89,8 +90,13 @@ class _LoginDialogState extends State<LoginDialog> {
                     decoration: const InputDecoration(
                         labelText: "密码", icon: Icon(Icons.lock_outline)),
                     obscureText: true,
-                    onSubmitted: (_) => login(_ipController.text,
-                        _nameController.text, _pwdController.text),
+                    onSubmitted: (_) {
+                      Settings.getInstance()
+                          .preferences
+                          .setString("username", _nameController.text);
+                      login(_ipController.text, _nameController.text,
+                          _pwdController.text);
+                    },
                   ),
                 ],
               ),
@@ -98,8 +104,13 @@ class _LoginDialogState extends State<LoginDialog> {
             actions: [
               TextButton(
                 child: const Text("登录"),
-                onPressed: () => login(_ipController.text, _nameController.text,
-                    _pwdController.text),
+                onPressed: () {
+                  Settings.getInstance()
+                      .preferences
+                      .setString("username", _nameController.text);
+                  login(_ipController.text, _nameController.text,
+                      _pwdController.text);
+                },
               ),
             ]));
   }

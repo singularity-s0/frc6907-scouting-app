@@ -29,7 +29,9 @@ import 'package:stop_watch_timer/stop_watch_timer.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   //HttpOverrides.global = SelfSignedCertHttpOverrides();
-  runApp(const ScountingApp());
+  Settings.getInstance().init().then((value) {
+    runApp(const ScountingApp());
+  });
 }
 
 class ScountingApp extends StatelessWidget {
@@ -208,6 +210,22 @@ class _HomePageState extends State<HomePage> {
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),
             itemBuilder: (context) => [
+              PopupMenuItem(
+                child: Settings.getInstance().preferences.getBool("showname") ==
+                        true
+                    ? const Text("隐藏项目名称")
+                    : const Text("显示项目名称"),
+                onTap: () {
+                  setState(() {
+                    Settings.getInstance().preferences.setBool(
+                        "showname",
+                        !(Settings.getInstance()
+                                .preferences
+                                .getBool("showname") ??
+                            false));
+                  });
+                },
+              ),
               PopupMenuItem(
                 child: const Text("退出登录"),
                 onTap: () {

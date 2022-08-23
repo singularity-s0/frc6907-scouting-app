@@ -223,7 +223,9 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
   Widget build(BuildContext context) {
     List<Widget> widgets = [];
     for (var field in fields) {
-      widgets.add(Text(field.nameCn));
+      if (Settings.getInstance().preferences.getBool("showname") == true) {
+        widgets.add(Text(field.nameCn));
+      }
       widgets.add(createWidget(context, field.root));
       widgets.add(const Divider());
     }

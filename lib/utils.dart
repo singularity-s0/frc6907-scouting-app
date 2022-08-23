@@ -19,6 +19,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Noticing {
   static showAlert(BuildContext context, String message, String title) {
@@ -93,6 +94,18 @@ class Noticing {
         context,
         "Copyright 2022 FRC Team 6907\n\nProject Open Source at https://github.com/singularity-s0/frc6907-scouting-app",
         "关于本应用");
+  }
+}
+
+class Settings {
+  late SharedPreferences preferences;
+
+  Settings._();
+  static final _instance = Settings._();
+  factory Settings.getInstance() => _instance;
+
+  Future<void> init() async {
+    preferences = await SharedPreferences.getInstance();
   }
 }
 
