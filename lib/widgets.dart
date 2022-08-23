@@ -537,6 +537,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                         ],
                       );
                     })),
+                /*
                 // Laps start time row
                 SizedBox(
                     height: 12,
@@ -554,7 +555,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                                 BoxConstraints constraints) =>
                             Stack(
                               children: buildLapsEndTime(constraints),
-                            ))),
+                            ))),*/
               ],
             );
           }),
@@ -584,6 +585,8 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     widget.onLapCreationCompleted?.call(tlduration);
                     if (widget.timer.isRunning) {
                       widget.onLapCreationStarted?.call(lastStartTime);
+                    } else {
+                      setState(() {});
                     }
                     finalInfoTimelineDurationNotYetCommited = false;
                   }
@@ -598,6 +601,8 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     widget.onLapCreationAborted?.call(lastStartTime);
                     if (widget.timer.isRunning) {
                       widget.onLapCreationStarted?.call(lastStartTime);
+                    } else {
+                      setState(() {});
                     }
                     finalInfoTimelineDurationNotYetCommited = false;
                   }
