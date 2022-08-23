@@ -75,7 +75,17 @@ class _HomePageState extends State<HomePage> {
   /// we store fields in JSON format and create instances of SCData only when needed
   /// so that we can have multiple instances of the same SCData
   List fields_json = [];
-  SCData currentField = SCData("Select Table", "选择表", false, false, false, []);
+  SCData _currentField = SCData("Select Table", "选择表", false, false, false, []);
+  SCData _lastField = SCData("Select Table", "选择表", false, false, false, []);
+
+  SCData get currentField => _currentField;
+  set currentField(SCData value) {
+    // This gets called every time currentfield is parsed from json
+    // To keep track of what was the last field
+    _currentField = value;
+    _lastField = SCData.fromJson(
+        jsonDecode(jsonEncode(value))); // FIXME: Hack to clone object
+  }
 
   int currentSelectedLap = 0;
 
@@ -126,17 +136,21 @@ class _HomePageState extends State<HomePage> {
     await _stopWatchTimer.dispose();
   }
 
+  SCData getFirstLegalField() {
+    try {
+      return fields_json
+          .map((e) => SCData.fromJson(e))
+          .firstWhere((element) => isCurrentPhase(element));
+    } catch (e) {
+      return SCData.fromJson(fields_json.first);
+    }
+  }
+
   Future<void> loadData() async {
     fields_json =
         (await ScoutingRepository.getInstance().loadInGameJson()) ?? [];
     setState(() {
-      try {
-        currentField = fields_json
-            .map((e) => SCData.fromJson(e))
-            .firstWhere((element) => element.Auto);
-      } catch (e) {
-        currentField = SCData.fromJson(fields_json.first);
-      }
+      currentField = getFirstLegalField();
     });
   }
 
@@ -145,21 +159,21 @@ class _HomePageState extends State<HomePage> {
     userData[currentSelectedLap].data = currentField;
   }
 
-  void showSCDataSelector() {
-    bool isCurrentPhase(SCData scData) {
-      final phase = MatchPhase.fromTime(
-          currentSelectedLapStartTime ?? _stopWatchTimer.rawTime.value);
-      switch (phase) {
-        case MatchPhase.auto:
-          return scData.Auto;
-        case MatchPhase.teleop:
-          return scData.Teleop;
-        case MatchPhase.endgame:
-          return scData.Endgame;
-      }
-      return false;
+  bool isCurrentPhase(SCData scData) {
+    final phase = MatchPhase.fromTime(
+        currentSelectedLapStartTime ?? _stopWatchTimer.rawTime.value);
+    switch (phase) {
+      case MatchPhase.auto:
+        return scData.Auto;
+      case MatchPhase.teleop:
+        return scData.Teleop;
+      case MatchPhase.endgame:
+        return scData.Endgame;
     }
+    return false;
+  }
 
+  void showSCDataSelector() {
     showModalBottomSheet(
         context: context,
         builder: (context) => BottomSheet(
@@ -199,8 +213,14 @@ class _HomePageState extends State<HomePage> {
           currentSelectedLap++;
           if (userData[currentSelectedLap].data != null) {
             currentField = userData[currentSelectedLap].data!;
-          } else if (_stopWatchTimer.isRunning) {
-            showSCDataSelector();
+          } else {
+            if (isCurrentPhase(currentField)) {
+              currentField = _lastField;
+            } else {
+              currentField = fields_json
+                  .map((e) => SCData.fromJson(e))
+                  .firstWhere((element) => isCurrentPhase(element));
+            }
           }
         });
       }
@@ -250,7 +270,7 @@ class _HomePageState extends State<HomePage> {
                   matchInfo = null;
                   currentSelectedLap = 0;
                   userData.clear();
-                  currentField = SCData.fromJson(fields_json.first);
+                  currentField = getFirstLegalField();
                   initialize();
                 },
               ),
@@ -288,13 +308,7 @@ class _HomePageState extends State<HomePage> {
                   setState(() {
                     currentSelectedLap = 0;
                     userData.clear();
-                    try {
-                      currentField = fields_json
-                          .map((e) => SCData.fromJson(e))
-                          .firstWhere((element) => element.Auto);
-                    } catch (e) {
-                      currentField = SCData.fromJson(fields_json.first);
-                    }
+                    currentField = getFirstLegalField();
                   });
                 },
                 onLapCreationCompleted: (tlduration) {
