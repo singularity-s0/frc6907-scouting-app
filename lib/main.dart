@@ -226,6 +226,9 @@ class _HomePageState extends State<HomePage> {
             }
           }
         });
+      } else if (!_stopWatchTimer.isRunning) {
+        // Fix no setstate called after timer is stopped
+        setState(() {});
       }
     }
   }
@@ -324,6 +327,17 @@ class _HomePageState extends State<HomePage> {
                     currentSelectedLap--;
                   }
                   userData.removeLast();
+                },
+                onFinalLapCreationAborted: () {
+                  setState(() {
+                    if (currentSelectedLap > 0) {
+                      currentSelectedLap--;
+                    } else {
+                      currentSelectedLap = 0;
+                      userData.clear();
+                      currentField = getFirstLegalField();
+                    }
+                  });
                 },
                 onTimerStop: () {
                   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {

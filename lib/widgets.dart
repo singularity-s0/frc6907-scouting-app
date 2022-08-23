@@ -271,6 +271,9 @@ class StopwatchTimeline extends StatefulWidget {
 
   final void Function(int)? onLapCreationAborted;
 
+  /// This is called in addition to [onLapCreationAborted]
+  final void Function()? onFinalLapCreationAborted;
+
   /// This is called every time the user taps on the Lap button and when the timer starts
   final void Function(TimelineDuration)? onLapCreationCompleted;
 
@@ -289,7 +292,8 @@ class StopwatchTimeline extends StatefulWidget {
       this.onTimerStop,
       this.selectedTimelineDuration,
       this.onLapCreationStarted,
-      this.onLapCreationAborted})
+      this.onLapCreationAborted,
+      this.onFinalLapCreationAborted})
       : super(key: key);
 
   @override
@@ -602,7 +606,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     if (widget.timer.isRunning) {
                       widget.onLapCreationStarted?.call(lastStartTime);
                     } else {
-                      setState(() {});
+                      widget.onFinalLapCreationAborted?.call();
                     }
                     finalInfoTimelineDurationNotYetCommited = false;
                   }
