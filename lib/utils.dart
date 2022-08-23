@@ -140,63 +140,44 @@ class _MatchInfoSelectorState extends State<MatchInfoSelector> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text("比赛信息"),
-      content: Form(
-        key: formKey,
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            TextFormField(
-              autofocus: true,
-              onChanged: (value) => team = int.tryParse(value),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: false),
-              validator: (value) =>
-                  int.tryParse(value ?? "") == null ? "请输入数字" : null,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: const InputDecoration(labelText: "比赛队伍"),
-            ),
-            IntrinsicWidth(
-              child: DropdownButtonFormField<String>(
-                hint: const Text("选择比赛"),
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: AlertDialog(
+        title: const Text("比赛信息"),
+        content: Form(
+          key: formKey,
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              TextFormField(
+                autofocus: true,
+                onChanged: (value) => team = int.tryParse(value),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: false),
                 validator: (value) =>
-                    value?.isNotEmpty == true ? null : "请选择比赛",
-                items: MATCH_NAME_CODE.keys
-                    .map((e) =>
-                        DropdownMenuItem<String>(value: e, child: Text(e)))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    matchType = value;
-                    if (MATCH_HAS_ROUND_COUNT[matchType] != true) {
-                      roundCount = null;
-                    }
-                  });
-                },
+                    int.tryParse(value ?? "") == null ? "请输入数字" : null,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                decoration: const InputDecoration(labelText: "比赛队伍"),
               ),
-            ),
-            const SizedBox(width: 4),
-            Row(mainAxisSize: MainAxisSize.min, children: [
-              const Text("第"),
-              const SizedBox(width: 4),
               IntrinsicWidth(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 24),
-                  child: TextFormField(
-                    onChanged: (value) => matchCount = value,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: false),
-                    validator: (value) =>
-                        int.tryParse(value ?? "") == null ? "请输入数字" : null,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                  ),
+                child: DropdownButtonFormField<String>(
+                  hint: const Text("选择比赛"),
+                  validator: (value) =>
+                      value?.isNotEmpty == true ? null : "请选择比赛",
+                  items: MATCH_NAME_CODE.keys
+                      .map((e) =>
+                          DropdownMenuItem<String>(value: e, child: Text(e)))
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      matchType = value;
+                      if (MATCH_HAS_ROUND_COUNT[matchType] != true) {
+                        roundCount = null;
+                      }
+                    });
+                  },
                 ),
               ),
-              const SizedBox(width: 4),
-              const Text("场"),
-            ]),
-            if (MATCH_HAS_ROUND_COUNT[matchType] == true) ...[
               const SizedBox(width: 4),
               Row(mainAxisSize: MainAxisSize.min, children: [
                 const Text("第"),
@@ -205,7 +186,7 @@ class _MatchInfoSelectorState extends State<MatchInfoSelector> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(minWidth: 24),
                     child: TextFormField(
-                      onChanged: (value) => roundCount = value,
+                      onChanged: (value) => matchCount = value,
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: false),
                       validator: (value) =>
@@ -215,18 +196,41 @@ class _MatchInfoSelectorState extends State<MatchInfoSelector> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Text("局"),
+                const Text("场"),
               ]),
-            ]
-          ],
+              if (MATCH_HAS_ROUND_COUNT[matchType] == true) ...[
+                const SizedBox(width: 4),
+                Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Text("第"),
+                  const SizedBox(width: 4),
+                  IntrinsicWidth(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 24),
+                      child: TextFormField(
+                        onChanged: (value) => roundCount = value,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: false),
+                        validator: (value) =>
+                            int.tryParse(value ?? "") == null ? "请输入数字" : null,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text("局"),
+                ]),
+              ]
+            ],
+          ),
         ),
+        actions: <Widget>[
+          if (widget.canDismiss)
+            TextButton(
+                child: const Text("取消"),
+                onPressed: () => Navigator.pop(context)),
+          TextButton(child: const Text("好"), onPressed: submit),
+        ],
       ),
-      actions: <Widget>[
-        if (widget.canDismiss)
-          TextButton(
-              child: const Text("取消"), onPressed: () => Navigator.pop(context)),
-        TextButton(child: const Text("好"), onPressed: submit),
-      ],
     );
   }
 }
