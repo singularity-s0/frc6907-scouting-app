@@ -558,9 +558,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
               ],
             );
           }),
-      const SizedBox(
-        height: 16,
-      ),
+      const SizedBox(height: 4),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [

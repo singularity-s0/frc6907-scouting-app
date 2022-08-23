@@ -155,8 +155,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void saveData() {
-    assert(userData.length > currentSelectedLap);
-    userData[currentSelectedLap].data = currentField;
+    if (userData.length > currentSelectedLap) {
+      userData[currentSelectedLap].data = currentField;
+    } else {
+      Noticing.showAlert(context, "请选择时间段", "错误");
+    }
   }
 
   bool isCurrentPhase(SCData scData) {
@@ -238,12 +241,6 @@ class _HomePageState extends State<HomePage> {
           },
         ),
         actions: [
-          TextButton(
-              onPressed: showSCDataSelector,
-              child: Text(
-                currentField.ItemChn,
-                style: Theme.of(context).primaryTextTheme.bodyText1,
-              )),
           PopupMenuButton(
             icon: const Icon(Icons.more_vert),
             itemBuilder: (context) => [
@@ -288,7 +285,8 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              padding: const EdgeInsets.only(
+                  top: 16, left: 16, right: 16, bottom: 4),
               child: StopwatchTimeline(
                 timer: _stopWatchTimer,
                 selectedTimelineDuration: currentSelectedLap,
@@ -321,10 +319,10 @@ class _HomePageState extends State<HomePage> {
                   userData.last.startTime = newStartTime;
                 },
                 onLapCreationAborted: (newStartTime) {
-                  userData.removeLast();
                   if (currentSelectedLap >= userData.length) {
                     currentSelectedLap--;
                   }
+                  userData.removeLast();
                 },
                 onTimerStop: () {
                   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -333,6 +331,22 @@ class _HomePageState extends State<HomePage> {
                   });
                 },
               ),
+            ),
+            const Divider(height: 0),
+            Wrap(
+              children: fields_json
+                  .map((e) => SCData.fromJson(e))
+                  .map((e) => TextButton(
+                        child: Text(e.ItemChn),
+                        onPressed: isCurrentPhase(e)
+                            ? () {
+                                setState(() {
+                                  currentField = e;
+                                });
+                              }
+                            : null,
+                      ))
+                  .toList(),
             ),
             Expanded(
               child: SingleChildScrollView(
