@@ -330,12 +330,12 @@ class _HomePageState extends State<HomePage> {
                 },
                 onFinalLapCreationAborted: () {
                   setState(() {
-                    if (currentSelectedLap > 0) {
-                      currentSelectedLap--;
-                    } else {
+                    if (userData.isEmpty) {
                       currentSelectedLap = 0;
                       userData.clear();
                       currentField = getFirstLegalField();
+                    } else if (currentSelectedLap >= userData.length) {
+                      currentSelectedLap--;
                     }
                   });
                 },
@@ -386,7 +386,8 @@ class _HomePageState extends State<HomePage> {
                           onPressed: (_stopWatchTimer.rawTime.value >=
                                       MATCH_TIME &&
                                   userData.isNotEmpty &&
-                                  userData.last.endTime != null)
+                                  userData.last.endTime != null &&
+                                  userData.last.data != null)
                               ? () async {
                                   if (mainFormKey.currentState?.validate() ==
                                           true &&
