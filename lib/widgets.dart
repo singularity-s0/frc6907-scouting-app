@@ -121,11 +121,8 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
                         });
                       }
                     : null),
-            SizedBox(
-              width: 48,
-              child: Center(
-                child: Text("${widgetData.name}: ${widgetData.data}"),
-              ),
+            IntrinsicWidth(
+              child: Text("${widgetData.name}: ${widgetData.data}"),
             ),
             const SizedBox(width: 8),
             IconButton(
