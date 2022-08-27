@@ -618,7 +618,8 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             child: const Text("放弃"),
           ),
           ElevatedButton(
-            onPressed: widget.selectedTimelineDuration == null
+            onPressed: (widget.selectedTimelineDuration == null ||
+                    widget.selectedTimelineDuration! >= durations.length)
                 ? null
                 : () async {
                     if (await Noticing.showConfirmationDialog(
