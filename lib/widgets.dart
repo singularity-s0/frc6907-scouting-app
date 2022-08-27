@@ -384,20 +384,24 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
         .toList();
   }
 
-  bool get isSessionStarted =>
-      widget.timer.rawTime.value > 0 || widget.timer.isRunning;
+  int get currentTime => widget.timer.rawTime.value <= MATCH_TIME
+      ? widget.timer.rawTime.value
+      : MATCH_TIME;
+
+  bool get isSessionStarted => currentTime > 0 || widget.timer.isRunning;
 
   @override
   Widget build(BuildContext context) {
     return Column(children: [
       StreamBuilder<int>(
           stream: widget.timer.rawTime,
-          initialData: widget.timer.rawTime.value,
+          initialData: currentTime,
           builder: (context, snap) {
-            final value = snap.data!;
+            final value = currentTime;
             if (value >= MATCH_TIME && widget.timer.isRunning) {
               // Stop timer
               widget.timer.onExecute.add(StopWatchExecute.stop);
+
               widget.onTimerStop?.call();
               finalInfoTimelineDurationNotYetCommited = true;
             }
@@ -582,10 +586,10 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             onPressed: (widget.timer.isRunning ||
                     finalInfoTimelineDurationNotYetCommited)
                 ? () {
-                    final tlduration = TimelineDuration(durations.length,
-                        lastStartTime, widget.timer.rawTime.value);
+                    final tlduration = TimelineDuration(
+                        durations.length, lastStartTime, currentTime);
                     durations.add(tlduration);
-                    lastStartTime = widget.timer.rawTime.value;
+                    lastStartTime = currentTime;
                     widget.onLapCreationCompleted?.call(tlduration);
                     if (widget.timer.isRunning) {
                       widget.onLapCreationStarted?.call(lastStartTime);
@@ -601,7 +605,7 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             onPressed: (widget.timer.isRunning ||
                     finalInfoTimelineDurationNotYetCommited)
                 ? () {
-                    lastStartTime = widget.timer.rawTime.value;
+                    lastStartTime = currentTime;
                     widget.onLapCreationAborted?.call(lastStartTime);
                     if (widget.timer.isRunning) {
                       widget.onLapCreationStarted?.call(lastStartTime);

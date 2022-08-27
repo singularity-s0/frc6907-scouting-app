@@ -96,6 +96,10 @@ class _HomePageState extends State<HomePage> {
   final StopWatchTimer _stopWatchTimer =
       StopWatchTimer(mode: StopWatchMode.countUp);
 
+  int get currentTime => _stopWatchTimer.rawTime.value <= MATCH_TIME
+      ? _stopWatchTimer.rawTime.value
+      : MATCH_TIME;
+
   @override
   void initState() {
     super.initState();
@@ -163,8 +167,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   bool isCurrentPhase(SCData scData) {
-    final phase = MatchPhase.fromTime(
-        currentSelectedLapStartTime ?? _stopWatchTimer.rawTime.value);
+    final phase =
+        MatchPhase.fromTime(currentSelectedLapStartTime ?? currentTime);
     switch (phase) {
       case MatchPhase.auto:
         return scData.Auto;
@@ -383,8 +387,7 @@ class _HomePageState extends State<HomePage> {
                           child: const Text("确认"),
                         ),
                         ElevatedButton(
-                          onPressed: (_stopWatchTimer.rawTime.value >=
-                                      MATCH_TIME &&
+                          onPressed: (currentTime >= MATCH_TIME &&
                                   userData.isNotEmpty &&
                                   userData.last.endTime != null &&
                                   userData.last.data != null)
