@@ -124,7 +124,7 @@ class _ScoutingFieldsFormState extends State<ScoutingFieldsForm> {
             SizedBox(
               width: 48,
               child: Center(
-                child: Text(widgetData.data.toString()),
+                child: Text("${widgetData.name}: ${widgetData.data}"),
               ),
             ),
             const SizedBox(width: 8),
