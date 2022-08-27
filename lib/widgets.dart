@@ -283,6 +283,9 @@ class StopwatchTimeline extends StatefulWidget {
   /// Called when user resets the stopwatch
   final void Function()? onReset;
 
+  /// Called when user deletes a duration
+  final void Function(int)? onDeleteDuration;
+
   const StopwatchTimeline(
       {Key? key,
       required this.timer,
@@ -293,7 +296,8 @@ class StopwatchTimeline extends StatefulWidget {
       this.selectedTimelineDuration,
       this.onLapCreationStarted,
       this.onLapCreationAborted,
-      this.onFinalLapCreationAborted})
+      this.onFinalLapCreationAborted,
+      this.onDeleteDuration})
       : super(key: key);
 
   @override
@@ -401,7 +405,6 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             if (value >= MATCH_TIME && widget.timer.isRunning) {
               // Stop timer
               widget.timer.onExecute.add(StopWatchExecute.stop);
-
               widget.onTimerStop?.call();
               finalInfoTimelineDurationNotYetCommited = true;
             }
@@ -618,6 +621,25 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             child: const Text("放弃"),
           ),
           ElevatedButton(
+            onPressed: widget.selectedTimelineDuration == null
+                ? null
+                : () async {
+                    if (await Noticing.showConfirmationDialog(
+                            context, "删除选中的时间段？", "确认删除") ==
+                        true) {
+                      durations.removeAt(widget.selectedTimelineDuration!);
+                      for (int i = widget.selectedTimelineDuration!;
+                          i < durations.length;
+                          i++) {
+                        durations[i].id--;
+                      }
+                      widget.onDeleteDuration
+                          ?.call(widget.selectedTimelineDuration!);
+                    }
+                  },
+            child: const Text("删除"),
+          ),
+          ElevatedButton(
             onPressed: () async {
               if (await Noticing.showConfirmationDialog(
                       context, "所有已经记录的数据将被清空", "确认重置") ==
@@ -626,7 +648,6 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                 lastStartTime = 0;
                 widget.timer.onExecute.add(StopWatchExecute.reset);
                 widget.onReset?.call();
-                setState(() {});
               }
             },
             child: const Text("重置"),

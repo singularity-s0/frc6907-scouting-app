@@ -236,7 +236,7 @@ class _MatchInfoSelectorState extends State<MatchInfoSelector> {
 }
 
 class TimelineDuration {
-  final int id;
+  int id;
   final int start;
   final int end;
   TimelineDuration(this.id, this.start, this.end);

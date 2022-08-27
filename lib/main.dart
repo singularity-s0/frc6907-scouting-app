@@ -349,6 +349,14 @@ class _HomePageState extends State<HomePage> {
                     setState(() {});
                   });
                 },
+                onDeleteDuration: (index) {
+                  setState(() {
+                    userData.removeAt(index);
+                    if (userData[currentSelectedLap].data != null) {
+                      currentField = userData[currentSelectedLap].data!;
+                    }
+                  });
+                },
               ),
             ),
             const Divider(height: 0),
