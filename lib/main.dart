@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:scouting_6907/login.dart';
 import 'package:scouting_6907/models.dart';
 import 'package:scouting_6907/repository.dart';
+import 'package:scouting_6907/stats.dart';
 import 'package:scouting_6907/utils.dart';
 import 'package:scouting_6907/widgets.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
@@ -43,6 +44,11 @@ class ScountingApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Team 6907',
+      routes: <String, WidgetBuilder>{
+        '/': (context, {argument}) =>
+            const HomePage(title: 'Team 6907 Scouting'),
+        '/stats': (context, {argument}) => const StatsPage(),
+      },
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFF182181), brightness: Brightness.light),
@@ -51,7 +57,7 @@ class ScountingApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFF182181), brightness: Brightness.dark),
       ),
-      home: const HomePage(title: 'Team 6907 Scouting'),
+      initialRoute: '/',
     );
   }
 }
@@ -265,6 +271,14 @@ class _HomePageState extends State<HomePage> {
                                 .getBool("showname") ??
                             false));
                   });
+                },
+              ),
+              PopupMenuItem(
+                child: const Text("统计"),
+                onTap: () async {
+                  await Future.delayed(
+                      Duration.zero); // a hack to allow push in PopupMenuItem
+                  await Navigator.pushNamed(context, "/stats");
                 },
               ),
               PopupMenuItem(
