@@ -92,34 +92,9 @@ class ScoutingRepository {
   }
 
   Future<dynamic> getTeamData(int team) async {
-    const retString = """{
-  "team": 118,
-  "basicstat_rk": {
-    "时间": "进攻144.52(1) / 防守0.00(1) / 放弃5.48(1)",
-    "Cycle": "场均0.00(1) / 被防0.00",
-    "得分": "pp10s 0.00(1) / tpp10s 0.00(1)",
-    "爬升": "低0/0/0.0 中0/0/0.0 高0/0/0.0 顶0/0/0.0 ",
-    "升钩": "14.3 (0.0)",
-    "自动": "过线0% / 场均0.00(1)",
-    "低框": "0.0/0.0/0.00(1)",
-    "高框": "0.0/0.0/0.00(1)",
-    "技术": "超吸0.0 / 犯规0.0 / PIN 0.0 / 技犯0 / 百秒失0.0"
-  },
-  "featstat": {
-    "左起自动": "一射0.0/0.00  二射0.0/0.00  三射0.0/0.00",
-    "右起自动": "一射0.0/0.00  二射0.0/0.00  三射0.0/0.00",
-    "起步": "左0/右0",
-    "停车": "左0/中0/右0",
-    "吸球倾向": "对场0%/贴墙0%/混杂0%/盲区0%/异色0%",
-    "出手倾向": "广告0%/安全0%/围栏0%",
-    "异色": "自动0 / 射出0 / 放置0"
-  }
-}""";
-    // final response = await dio.get(BASE_URL + "/strategy/team/$team",
-    //     options: Options(headers: _tokenHeader));
-    // final dynamic result = json.decode(response.data);
-    // print(result);
-    final dynamic result = json.decode(retString);
+    final response = await dio.get(BASE_URL + "/strategy/team/$team",
+        options: Options(headers: _tokenHeader));
+    final dynamic result = response.data;
     return result;
   }
 }
