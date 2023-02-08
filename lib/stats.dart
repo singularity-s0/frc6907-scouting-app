@@ -15,6 +15,8 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:linked_scroll_controller/linked_scroll_controller.dart';
 import 'package:scouting_6907/repository.dart';
@@ -230,10 +232,27 @@ class StatsDetailView extends StatelessWidget {
             ),
           ),
           children: [
-            Padding(padding: const EdgeInsets.all(4.0), child: Text(key)),
             Padding(
                 padding: const EdgeInsets.all(4.0),
-                child: Text(data[key].toString()))
+                child: Text(
+                  key,
+                  style: const TextStyle(
+                    fontFeatures: <FontFeature>[
+                      FontFeature.tabularFigures(),
+                    ],
+                  ),
+                )),
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(
+                data[key].toString(),
+                style: const TextStyle(
+                  fontFeatures: <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
+              ),
+            )
           ]));
     }
     return Padding(
