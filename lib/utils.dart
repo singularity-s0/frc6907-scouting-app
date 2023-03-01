@@ -264,16 +264,14 @@ class SelfSignedCertHttpOverrides extends HttpOverrides {
 const Map<String, String> MATCH_NAME_CODE = {
   "练习赛": "p",
   "资格赛": "qm",
-  "八进四": "qf",
-  "半决赛": "sf",
+  "淘汰赛": "pf",
   "决赛": "f"
 };
 const Map<String, bool> MATCH_HAS_ROUND_COUNT = {
   "练习赛": false,
   "资格赛": false,
-  "八进四": true,
-  "半决赛": true,
-  "决赛": true
+  "淘汰赛": false,
+  "决赛": false
 };
 
 class MatchPhase {
@@ -287,10 +285,11 @@ class MatchPhase {
   static const teleop = MatchPhase._internal('teleop');
   static const endgame = MatchPhase._internal('endgame');
 
+  // 2023: 3s delay between auto and teleop
   static MatchPhase fromTime(int matchTime) {
-    if (matchTime <= 15000) {
+    if (matchTime <= 18000) {
       return MatchPhase.auto;
-    } else if (matchTime <= 120000) {
+    } else if (matchTime <= 123000) {
       return MatchPhase.teleop;
     } else {
       return MatchPhase.endgame;

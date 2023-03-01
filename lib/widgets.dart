@@ -20,7 +20,8 @@ import 'package:scouting_6907/models.dart';
 import 'package:scouting_6907/utils.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
-const MATCH_TIME = 150000;
+// 2023: 3s delay between auto and teleop
+const MATCH_TIME = 153000;
 
 class ScoutingFieldsForm extends StatefulWidget {
   const ScoutingFieldsForm(
