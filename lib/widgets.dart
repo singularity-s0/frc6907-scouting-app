@@ -20,7 +20,7 @@ import 'package:scouting_6907/models.dart';
 import 'package:scouting_6907/utils.dart';
 import 'package:stop_watch_timer/stop_watch_timer.dart';
 
-// 2023: 3s delay between auto and teleop
+// 2023/2024: 3s delay between auto and teleop
 const MATCH_TIME = 153000;
 
 class ScoutingFieldsForm extends StatefulWidget {
@@ -281,6 +281,9 @@ class StopwatchTimeline extends StatefulWidget {
   /// Called when user resets the stopwatch
   final void Function()? onReset;
 
+  /// Called when user go back one duration
+  final void Function()? onGoPrevDuration;
+
   /// Called when user deletes a duration
   final void Function(int)? onDeleteDuration;
 
@@ -289,6 +292,7 @@ class StopwatchTimeline extends StatefulWidget {
       required this.timer,
       this.onSelectLap,
       this.onReset,
+      this.onGoPrevDuration,
       this.onLapCreationCompleted,
       this.onTimerStop,
       this.selectedTimelineDuration,
@@ -582,6 +586,14 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     setState(() {});
                   },
             child: const Text("开始"),
+          ),
+          ElevatedButton(
+            onPressed: (isSessionStarted)
+              ? () {
+                  widget.onGoPrevDuration?.call();
+                }
+              : null,
+            child: const Text("⬅️"),
           ),
           ElevatedButton(
             onPressed: (widget.timer.isRunning ||

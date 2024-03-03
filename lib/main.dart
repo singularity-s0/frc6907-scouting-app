@@ -330,6 +330,19 @@ class _HomePageState extends State<HomePage> {
                     currentField = getFirstLegalField();
                   });
                 },
+                onGoPrevDuration: () {
+                  if (currentSelectedLap > 0) {
+                    saveData();
+                    setState(
+                      () {
+                        currentSelectedLap = currentSelectedLap - 1;
+                        if (userData[currentSelectedLap].data != null) {
+                          currentField = userData[currentSelectedLap].data!;
+                        }
+                      },
+                    );
+                  }
+                },
                 onLapCreationCompleted: (tlduration) {
                   saveData();
                   userData.last.startTime = tlduration.start;
