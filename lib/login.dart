@@ -50,10 +50,10 @@ class _LoginDialogState extends State<LoginDialog> {
     } catch (error) {
       if (error is DioError && error.response?.data != null) {
         Noticing.showAlert(
-            context, (error.response?.data).toString(), error.message);
+            context, (error.response?.data).toString(), error.message.toString());
       } else {
         if (error is DioError) {
-          Noticing.showAlert(context, error.message, "错误");
+          Noticing.showAlert(context, error.message.toString(), "错误");
         } else {
           Noticing.showAlert(context, error.toString(), "错误");
         }

@@ -32,7 +32,7 @@ class ScoutingRepository {
   ScoutingRepository._() {
     dio = Dio();
     dio.options =
-        BaseOptions(receiveDataWhenStatusError: true, connectTimeout: 5000);
+        BaseOptions(receiveDataWhenStatusError: true, connectTimeout: const Duration(milliseconds: 5000));
   }
 
   bool get isUserInitialized => _token != null;

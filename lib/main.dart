@@ -445,11 +445,11 @@ class _HomePageState extends State<HomePage> {
                                         Noticing.showAlert(
                                             context,
                                             (error.response?.data).toString(),
-                                            error.message);
+                                            error.message.toString());
                                       } else {
                                         if (error is DioError) {
                                           Noticing.showAlert(
-                                              context, error.message, "错误");
+                                              context, error.message.toString(), "错误");
                                         } else {
                                           Noticing.showAlert(
                                               context, error.toString(), "错误");
