@@ -586,6 +586,11 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     setState(() {});
                   },
             child: const Text("开始"),
+            style: ElevatedButton.styleFrom(
+                minimumSize: Size.zero, // Set this
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            ),
           ),
           ElevatedButton(
             onPressed: (isSessionStarted)
@@ -594,6 +599,11 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                 }
               : null,
             child: const Text("⬅️"),
+            style: ElevatedButton.styleFrom(
+                minimumSize: Size.zero, // Set this
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            ),
           ),
           ElevatedButton(
             onPressed: (widget.timer.isRunning ||
@@ -613,6 +623,11 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                   }
                 : null,
             child: const Text("计次"),
+            style: ElevatedButton.styleFrom(
+                minimumSize: Size.zero, // Set this
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            ),
           ),
           ElevatedButton(
             onPressed: (widget.timer.isRunning ||
@@ -629,6 +644,11 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                   }
                 : null,
             child: const Text("放弃"),
+            style: ElevatedButton.styleFrom(
+                minimumSize: Size.zero, // Set this
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            ),
           ),
           ElevatedButton(
             onPressed: (widget.selectedTimelineDuration == null ||
@@ -649,6 +669,11 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     }
                   },
             child: const Text("删除"),
+            style: ElevatedButton.styleFrom(
+                minimumSize: Size.zero, // Set this
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -662,6 +687,11 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
               }
             },
             child: const Text("重置"),
+            style: ElevatedButton.styleFrom(
+                minimumSize: Size.zero, // Set this
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            ),
           ),
         ],
       ),
