@@ -593,19 +593,6 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
             ),
           ),
           ElevatedButton(
-            onPressed: (isSessionStarted)
-              ? () {
-                  widget.onGoPrevDuration?.call();
-                }
-              : null,
-            child: const Text("⬅️"),
-            style: ElevatedButton.styleFrom(
-                minimumSize: Size.zero, // Set this
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
-            ),
-          ),
-          ElevatedButton(
             onPressed: (widget.timer.isRunning ||
                     finalInfoTimelineDurationNotYetCommited)
                 ? () {
@@ -669,6 +656,19 @@ class StopwatchTimelineState extends State<StopwatchTimeline> {
                     }
                   },
             child: const Text("删除"),
+            style: ElevatedButton.styleFrom(
+                minimumSize: Size.zero, // Set this
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: (isSessionStarted)
+              ? () {
+                  widget.onGoPrevDuration?.call();
+                }
+              : null,
+            child: const Text("⬅️"),
             style: ElevatedButton.styleFrom(
                 minimumSize: Size.zero, // Set this
                 padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
