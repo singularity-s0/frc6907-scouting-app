@@ -237,9 +237,10 @@ class StatsDetailView extends StatelessWidget {
                 child: Text(
                   key,
                   style: const TextStyle(
-                    fontFeatures: <FontFeature>[
-                      FontFeature.tabularFigures(),
-                    ],
+                    fontFamily: "monospace",
+                    // fontFeatures: <FontFeature>[
+                    //   FontFeature.tabularFigures(),
+                    // ],
                   ),
                 )),
             Padding(
@@ -247,9 +248,10 @@ class StatsDetailView extends StatelessWidget {
               child: Text(
                 data[key].toString(),
                 style: const TextStyle(
-                  fontFeatures: <FontFeature>[
-                    FontFeature.tabularFigures(),
-                  ],
+                  fontFamily: "monospace",
+                  // fontFeatures: <FontFeature>[
+                  //   FontFeature.tabularFigures(),
+                  // ],
                 ),
               ),
             )
