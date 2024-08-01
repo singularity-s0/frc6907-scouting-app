@@ -453,16 +453,16 @@ class _HomePageState extends State<HomePage> {
                                         return;
                                       }
                                     } catch (error) {
-                                      if (error is DioError &&
+                                      if (error is DioException &&
                                           error.response?.data != null) {
                                         Noticing.showAlert(
                                             context,
                                             (error.response?.data).toString(),
                                             error.message.toString());
                                       } else {
-                                        if (error is DioError) {
-                                          Noticing.showAlert(
-                                              context, error.message.toString(), "错误");
+                                        if (error is DioException) {
+                                          Noticing.showAlert(context,
+                                              error.message.toString(), "错误");
                                         } else {
                                           Noticing.showAlert(
                                               context, error.toString(), "错误");

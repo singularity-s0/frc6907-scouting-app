@@ -287,7 +287,7 @@ class MatchPhase {
 
   // 2023: 3s delay between auto and teleop
   static MatchPhase fromTime(int matchTime) {
-    if (matchTime <= 18000) {
+    if (matchTime <= 15000) {
       return MatchPhase.auto;
     } else if (matchTime <= 123000) {
       return MatchPhase.teleop;

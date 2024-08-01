@@ -48,11 +48,11 @@ class _LoginDialogState extends State<LoginDialog> {
       final token = await ScoutingRepository.getInstance().login(id, password);
       Navigator.pop(context, token);
     } catch (error) {
-      if (error is DioError && error.response?.data != null) {
-        Noticing.showAlert(
-            context, (error.response?.data).toString(), error.message.toString());
+      if (error is DioException && error.response?.data != null) {
+        Noticing.showAlert(context, (error.response?.data).toString(),
+            error.message.toString());
       } else {
-        if (error is DioError) {
+        if (error is DioException) {
           Noticing.showAlert(context, error.message.toString(), "错误");
         } else {
           Noticing.showAlert(context, error.toString(), "错误");

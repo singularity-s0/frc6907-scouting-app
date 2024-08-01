@@ -15,8 +15,6 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 
 class ScoutingRepository {
@@ -31,8 +29,9 @@ class ScoutingRepository {
 
   ScoutingRepository._() {
     dio = Dio();
-    dio.options =
-        BaseOptions(receiveDataWhenStatusError: true, connectTimeout: const Duration(milliseconds: 5000));
+    dio.options = BaseOptions(
+        receiveDataWhenStatusError: true,
+        connectTimeout: const Duration(milliseconds: 5000));
   }
 
   bool get isUserInitialized => _token != null;
